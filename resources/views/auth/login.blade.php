@@ -105,12 +105,32 @@
                     <h1 class="card-title">Selamat Datang di Portal UPT PLN</h1>
                     <p class="text-muted mb-4">Silakan masuk untuk melanjutkan.</p>
 
-                    <form action="#" method="POST"> <!-- Action should be your login endpoint -->
+                    <form action="{{ route('login.attempt') }}" method="POST">
+                        @csrf
+                        @if ($errors->any())
+                            <div class="alert alert-danger mb-4">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <div class="mb-3">
-                            <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="Email atau Username" required autofocus>
+                            <input type="email" class="form-control form-control-lg @error('email') is-invalid @enderror" id="email" name="email" placeholder="Email atau Username" required autofocus value="{{ old('email') }}">
+                            @error('email')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                         <div class="mb-4">
-                            <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Kata Sandi" required>
+                            <input type="password" class="form-control form-control-lg @error('password') is-invalid @enderror" id="password" name="password" placeholder="Kata Sandi" required>
+                            @error('password')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                         <div class="d-grid gap-2 mb-4">
                             <button type="submit" class="btn btn-pln btn-lg">Masuk</button>
