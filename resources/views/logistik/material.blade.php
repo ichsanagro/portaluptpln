@@ -1,236 +1,81 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Material - Portal UPT PLN</title>
+@extends('layouts.app')
 
-    <!-- Bootstrap 5.3 CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+@section('title', 'Kelola Material')
 
-    <style>
-        :root {
-            --pln-blue: #00549B;
-            --pln-yellow: #FFD200;
-            --sidebar-width: 280px;
-            --light-bg: #f8f9fa;
-            --text-dark: #212529;
-            --text-muted: #6c757d;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: var(--sidebar-width);
-            background-color: var(--pln-blue);
-            padding: 1.5rem;
-            z-index: 1030;
-        }
-        .sidebar-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .sidebar-header .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            text-decoration: none;
-        }
-        .sidebar-header .logo i {
-            color: var(--pln-yellow);
-        }
-        .sidebar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.85);
-            padding: 0.85rem 1.25rem;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            font-weight: 500;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .sidebar-nav .nav-link i {
-            margin-right: 1rem;
-            font-size: 1.25rem;
-        }
-        .sidebar-nav .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-        .sidebar-nav .nav-link.active {
-            background-color: #fff;
-            color: var(--pln-blue);
-            font-weight: 600;
-        }
-        .sidebar-logout {
-            position: absolute;
-            bottom: 1.5rem;
-            width: calc(100% - 3rem);
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 2.5rem;
-        }
-        
-        #page-title {
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .card-modern {
-            background-color: #ffffff;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            padding: 2rem;
-        }
-        .card-modern .card-header-modern {
-             padding-bottom: 1.5rem;
-             margin-bottom: 1.5rem;
-             border-bottom: 1px solid #f0f0f0;
-        }
-
-        .search-container {
-            position: relative;
-        }
-        .search-container .form-control {
-            padding-left: 2.5rem;
-            border-radius: 50rem;
-            background-color: #f1f3f5;
-            border: none;
-        }
-        .search-container .search-icon {
-            position: absolute;
-            left: 0.9rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-        }
-        .btn-pln {
-            background-color: var(--pln-blue);
-            color: #fff;
-            border: none;
-            font-weight: 600;
-            padding: 0.6rem 1.2rem;
-            border-radius: .5rem;
-        }
-        .btn-pln:hover {
-            background-color: #004a89;
-        }
-
-        .table-clean {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .table-clean thead th {
-            background-color: var(--pln-blue);
-            color: #fff;
-            font-weight: 600;
-            text-align: left;
-            padding: 1rem 1.25rem;
-            border-bottom: none;
-        }
-        .table-clean thead th:first-child { border-top-left-radius: 10px; }
-        .table-clean thead th:last-child { border-top-right-radius: 10px; }
-
-        .table-clean tbody td {
-            padding: 1.25rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .table-clean tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .table-actions button, .table-actions a {
-            background: none;
-            border: none;
-            padding: 0.25rem 0.5rem;
-            font-size: 1.1rem;
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-        .table-actions .icon-edit { color: var(--pln-blue); }
-        .table-actions .icon-delete { color: var(--text-muted); }
-        .table-actions button:hover, .table-actions a:hover {
-            transform: scale(1.2);
-        }
-        .table-actions .icon-delete:hover {
-            color: #dc3545;
-        }
-    </style>
-</head>
-<body>
-    @include('layouts.partials.sidebar')
-    
-    <!-- Main Content -->
-    <div class="main-content">
-        <header class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h2" id="page-title">Kelola Material</h1>
-            <button class="btn d-lg-none" id="sidebar-toggler"><i class="bi bi-list fs-2"></i></button>
-        </header>
-
-        <div class="card-modern">
-            <div class="card-header-modern d-flex flex-wrap justify-content-between align-items-center gap-3">
-                <div class="search-container col-12 col-md-4">
-                    <i class="bi bi-search search-icon"></i>
-                    <input type="text" class="form-control" placeholder="Cari material...">
-                </div>
-                <button class="btn btn-pln"><i class="bi bi-plus-circle me-2"></i>Tambah Material</button>
+@section('content')
+<x-card>
+    {{-- Card Header --}}
+    <div class="border-b border-slate-200 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="w-full md:w-auto">
+                <h3 class="text-xl font-semibold text-slate-800">Daftar Material</h3>
+                <p class="mt-1 text-sm text-slate-600">Cari, tambah, atau kelola semua material yang terdaftar.</p>
             </div>
-            <div class="table-responsive">
-                <table class="table-clean">
-                    <thead>
+            <div class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
+                {{-- Search Box --}}
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                         <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </div>
+                    <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material...">
+                </div>
+                {{-- Add Button --}}
+                <button type="button" class="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                    <svg class="-ml-0.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    <span>Tambah Material</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Table --}}
+    <div class="flow-root">
+        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
                         <tr>
-                            <th>Kode</th>
-                            <th>Nama Material</th>
-                            <th>Kategori</th>
-                            <th>Stok</th>
-                            <th>Aksi</th>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Kode</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Nama Material</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Kategori</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Stok</th>
+                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                <span class="sr-only">Aksi</span>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        {{-- Table Row 1 --}}
                         <tr>
-                            <td><strong>KBL-001</strong></td>
-                            <td>Kabel NYY 4x16mm</td>
-                            <td>Kabel</td>
-                            <td>1500 Meter</td>
-                            <td class="table-actions">
-                                <button class="icon-edit"><i class="bi bi-pencil-square"></i></button>
-                                <button class="icon-delete"><i class="bi bi-trash-fill"></i></button>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">KBL-001</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Kabel NYY 4x16mm</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Kabel</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">1500 Meter</td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <a href="#" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <a href="#" class="ml-4 text-red-600 hover:text-red-900">Hapus</a>
                             </td>
                         </tr>
+                        {{-- Table Row 2 --}}
                         <tr>
-                            <td><strong>TRF-003</strong></td>
-                            <td>Trafo 250 kVA</td>
-                            <td>Transformator</td>
-                            <td>8 Unit</td>
-                            <td class="table-actions">
-                                <button class="icon-edit"><i class="bi bi-pencil-square"></i></button>
-                                <button class="icon-delete"><i class="bi bi-trash-fill"></i></button>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">TRF-003</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Trafo 250 kVA</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Transformator</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">8 Unit</td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <a href="#" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <a href="#" class="ml-4 text-red-600 hover:text-red-900">Hapus</a>
                             </td>
                         </tr>
+                        {{-- More rows... --}}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-</body>
-</html>
+</x-card>
+@endsection

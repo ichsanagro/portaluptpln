@@ -1,204 +1,114 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Portal UPT PLN</title>
-    
-    <!-- Bootstrap 5.3 CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
-    <!-- Bootstrap Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- Google Fonts: Poppins for a modern look -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        /* Custom CSS for PLN Corporate Branding */
-        :root {
-            --pln-blue: #00549B;
-            --pln-yellow: #FFD200;
-            --light-gray: #f8f9fa;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--light-gray);
-        }
-
-        .navbar-pln {
-            background-color: var(--pln-blue);
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
-        }
-
-        .navbar-pln .navbar-brand {
-            font-weight: 700;
-            color: #fff;
-        }
-        
-        .navbar-pln .navbar-brand:hover {
-            color: var(--pln-yellow);
-        }
-
-        .hero-section {
-            padding: 6rem 0;
-            background-color: #ffffff;
-        }
-
-        .hero-section .display-5 {
-            color: var(--pln-blue);
-            font-weight: 700;
-        }
-
-        .hero-section .lead {
-            color: #6c757d;
-        }
-
-        .interactive-card {
-            border: none;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-        }
-
-        .interactive-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 24px rgba(0,0,0,.12);
-        }
-
-        .card-icon {
-            font-size: 4rem;
-            color: var(--pln-blue);
-            margin-bottom: 1rem;
-        }
-        
-        .card-title {
-            color: var(--pln-blue);
-            font-weight: 600;
-        }
-
-        .btn-pln {
-            background-color: var(--pln-blue);
-            color: #ffffff;
-            border-radius: 50px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            border: 2px solid var(--pln-blue);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .btn-pln:hover {
-            background-color: #004a89;
-            color: #ffffff;
-            border-color: #004a89;
-        }
-
-        .btn-pln-secondary {
-            background-color: var(--pln-yellow);
-            color: var(--pln-blue);
-            border-radius: 50px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            border: 2px solid var(--pln-yellow);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .btn-pln-secondary:hover {
-            background-color: #e6bb00;
-            color: var(--pln-blue);
-            border-color: #e6bb00;
-        }
-        
-        .footer {
-            background-color: #ffffff;
-            padding: 2rem 0;
-            margin-top: 4rem;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-    </style>
+    @vite('resources/css/app.css')
 </head>
-<body>
+<body class="bg-slate-50 font-sans text-slate-900 antialiased">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-pln navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <!-- You can replace this text with an <img> tag for the actual logo -->
-                <i class="bi bi-lightning-charge-fill"></i>
-                PORTAL UPT PLN
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            {{-- <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Beranda</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Profil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Bantuan</a>
-                    </li>
-                </ul>
-            </div> --}}
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <header class="hero-section">
-        <div class="container text-center">
-            <h1 class="display-5">Portal Digital UPT PLN</h1>
-            <p class="lead col-lg-8 mx-auto">Selamat datang di pusat layanan digital terintegrasi untuk mendukung kinerja dan operasional seluruh karyawan UPT PLN.</p>
+    <!-- Header -->
+    <header class="bg-white/80 fixed left-0 top-0 z-50 w-full backdrop-blur-lg">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="h-8 w-auto text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                    </svg>
+                    <span class="text-xl font-bold tracking-tighter text-slate-900">PORTAL UPT PLN</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('login') }}" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                        Masuk
+                    </a>
+                </div>
+            </div>
         </div>
     </header>
 
-    <!-- Main Systems Section -->
-    <main class="container mt-5">
-        <div class="row g-4 justify-content-center">
-            
-            <!-- Card 1: Sistem Logistik -->
-            <div class="col-lg-5 col-md-6">
-                <div class="card interactive-card text-center p-4">
-                    <div class="card-body">
-                        <i class="bi bi-box-seam card-icon"></i>
-                        <h3 class="card-title">Sistem Logistik</h3>
-                        <p class="card-text text-muted">Manajemen stok, pemantauan aset, dan pengelolaan gudang secara efisien dan terpusat.</p>
-                        <a href="{{ route('login') }}" class="btn btn-pln mt-3">Masuk Sistem</a>
-                    </div>
+    <main>
+        <!-- Hero Section -->
+        <section class="relative bg-white pt-32 pb-20 lg:pt-40 lg:pb-28">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl text-center">
+                    <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+                        Portal Digital Terintegrasi UPT PLN
+                    </h1>
+                    <p class="mt-6 text-lg leading-8 text-slate-600">
+                        Pusat layanan digital untuk mendukung kinerja dan operasional seluruh karyawan UPT PLN secara efisien, modern, dan andal.
+                    </p>
                 </div>
             </div>
+        </section>
 
-            <!-- Card 2: Sistem HSE -->
-            <div class="col-lg-5 col-md-6">
-                <div class="card interactive-card text-center p-4">
-                    <div class="card-body">
-                        <i class="bi bi-shield-check card-icon"></i>
-                        <h3 class="card-title">Sistem HSE</h3>
-                        <p class="card-text text-muted">Pelaporan insiden, pemantauan K2/K3, dan pemenuhan standar keselamatan kerja.</p>
-                        <a href="{{ route('login') }}" class="btn btn-pln mt-3">Masuk Sistem</a>
+        <!-- Features Section -->
+        <section class="bg-slate-50 py-20 sm:py-28">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Sistem Utama</h2>
+                    <p class="mt-4 text-lg text-slate-600">
+                        Akses sistem utama yang Anda butuhkan untuk menunjang pekerjaan sehari-hari.
+                    </p>
+                </div>
+                <div class="mx-auto mt-16 grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-2">
+                    <!-- Card 1: Sistem Logistik -->
+                    <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                        <div class="flex flex-1 flex-col justify-between p-8">
+                            <div class="flex-1">
+                                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-7 w-7">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5l.415-.207a.75.75 0 011.085.67V10.5m0 0h6m-6 0a.75.75 0 00-1.085.67l-.416-.207a.75.75 0 01-1.085-.67V7.5m-4.5 4.5v.75A.75.75 0 005.25 12h13.5a.75.75 0 00.75-.75v-.75m-15 4.5v.75a.75.75 0 00.75.75h13.5a.75.75 0 00.75-.75v-.75" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-semibold text-slate-900">Sistem Logistik</h3>
+                                <p class="mt-3 text-base text-slate-500">
+                                    Manajemen stok, pemantauan aset, dan pengelolaan gudang secara efisien dan terpusat.
+                                </p>
+                            </div>
+                            <div class="mt-6">
+                                <a href="{{ route('login') }}" class="w-full rounded-md bg-slate-800 px-5 py-3 text-center font-semibold text-white shadow-sm hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800">
+                                    Masuk Sistem Logistik
+                                </a>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Card 2: Sistem HSE -->
+                    <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                        <div class="flex flex-1 flex-col justify-between p-8">
+                            <div class="flex-1">
+                                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-7 w-7">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-semibold text-slate-900">Sistem HSE</h3>
+                                <p class="mt-3 text-base text-slate-500">
+                                    Pelaporan insiden, pemantauan K2/K3, dan pemenuhan standar keselamatan kerja.
+                                </p>
+                            </div>
+                            <div class="mt-6">
+                                <a href="{{ route('login') }}" class="w-full rounded-md bg-slate-800 px-5 py-3 text-center font-semibold text-white shadow-sm hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800">
+                                    Masuk Sistem HSE
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
-        </div>
+        </section>
     </main>
-    
+
     <!-- Footer -->
-    <footer class="footer text-center">
-        <div class="container">
-            <span>&copy; 2026 - PT PLN (Persero). All Rights Reserved.</span>
+    <footer class="bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <p class="text-center text-sm leading-5 text-slate-500">
+                &copy; {{ date('Y') }} - PT PLN (Persero). All Rights Reserved.
+            </p>
         </div>
     </footer>
 
-    <!-- Bootstrap 5.3 JS Bundle CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

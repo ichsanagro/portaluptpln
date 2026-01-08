@@ -1,230 +1,84 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Permintaan Material - Portal UPT PLN</title>
+@extends('layouts.app')
 
-    <!-- Bootstrap 5.3 CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+@section('title', 'Permintaan Material')
 
-    <style>
-        :root {
-            --pln-blue: #00549B;
-            --pln-yellow: #FFD200;
-            --sidebar-width: 280px;
-            --light-bg: #f8f9fa;
-            --text-dark: #212529;
-            --text-muted: #6c757d;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: var(--sidebar-width);
-            background-color: var(--pln-blue);
-            padding: 1.5rem;
-            z-index: 1030;
-        }
-        .sidebar-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .sidebar-header .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            text-decoration: none;
-        }
-        .sidebar-header .logo i {
-            color: var(--pln-yellow);
-        }
-        .sidebar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.85);
-            padding: 0.85rem 1.25rem;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            font-weight: 500;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .sidebar-nav .nav-link i {
-            margin-right: 1rem;
-            font-size: 1.25rem;
-        }
-        .sidebar-nav .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-        .sidebar-nav .nav-link.active {
-            background-color: #fff;
-            color: var(--pln-blue);
-            font-weight: 600;
-        }
-        .sidebar-logout {
-            position: absolute;
-            bottom: 1.5rem;
-            width: calc(100% - 3rem);
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 2.5rem;
-        }
-        
-        #page-title {
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .card-modern {
-            background-color: #ffffff;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            padding: 2rem;
-        }
-        .card-modern .card-header-modern {
-             padding-bottom: 1.5rem;
-             margin-bottom: 1.5rem;
-             border-bottom: 1px solid #f0f0f0;
-        }
-
-        .search-container {
-            position: relative;
-        }
-        .search-container .form-control {
-            padding-left: 2.5rem;
-            border-radius: 50rem;
-            background-color: #f1f3f5;
-            border: none;
-        }
-        .search-container .search-icon {
-            position: absolute;
-            left: 0.9rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-        }
-        
-        .table-clean {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .table-clean thead th {
-            background-color: var(--pln-blue);
-            color: #fff;
-            font-weight: 600;
-            text-align: left;
-            padding: 1rem 1.25rem;
-            border-bottom: none;
-        }
-        .table-clean thead th:first-child { border-top-left-radius: 10px; }
-        .table-clean thead th:last-child { border-top-right-radius: 10px; }
-
-        .table-clean tbody td {
-            padding: 1.25rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .table-clean tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .table-actions button, .table-actions a {
-            background: none;
-            border: none;
-            padding: 0.25rem 0.5rem;
-            font-size: 1.1rem;
-            text-decoration: none;
-        }
-        
-        .badge.pill-status {
-            border-radius: 50rem;
-            font-weight: 600;
-            padding: 0.4em 0.8em;
-            font-size: 0.8rem;
-        }
-        .pill-status.status-waiting {
-            background-color: rgba(0, 84, 155, 0.1);
-            color: var(--pln-blue);
-        }
-        .pill-status.status-approved {
-            background-color: rgba(25, 135, 84, 0.1);
-            color: #198754;
-        }
-    </style>
-</head>
-<body>
-    @include('layouts.partials.sidebar')
-    
-    <!-- Main Content -->
-    <div class="main-content">
-        <header class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h2" id="page-title">Permintaan Material</h1>
-            <button class="btn d-lg-none" id="sidebar-toggler"><i class="bi bi-list fs-2"></i></button>
-        </header>
-
-        <div class="card-modern">
-            <div class="card-header-modern d-flex flex-wrap justify-content-between align-items-center gap-3">
-               <div class="search-container col-12 col-md-4">
-                   <i class="bi bi-search search-icon"></i>
-                   <input type="text" class="form-control" placeholder="Cari permintaan...">
-               </div>
+@section('content')
+<x-card>
+    {{-- Card Header --}}
+    <div class="border-b border-slate-200 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="w-full md:w-auto">
+                <h3 class="text-xl font-semibold text-slate-800">Daftar Permintaan</h3>
+                <p class="mt-1 text-sm text-slate-600">Kelola permintaan material yang diajukan oleh user.</p>
             </div>
-           <div class="table-responsive">
-               <table class="table-clean">
-                   <thead>
-                       <tr>
-                           <th>Tanggal</th>
-                           <th>User</th>
-                           <th>Material</th>
-                           <th>Jumlah</th>
-                           <th>Status</th>
-                           <th>Aksi</th>
-                       </tr>
-                   </thead>
-                   <tbody>
-                       <tr>
-                           <td>2024-07-28</td>
-                           <td>User Logistik</td>
-                           <td>Kabel NYY 4x16mm</td>
-                           <td>200 Meter</td>
-                           <td><span class="badge pill-status status-waiting">Menunggu</span></td>
-                           <td class="table-actions">
-                               <button class="btn btn-sm btn-outline-success">Setuju</button>
-                               <button class="btn btn-sm btn-outline-danger">Tolak</button>
-                           </td>
-                       </tr>
-                        <tr>
-                           <td>2024-07-27</td>
-                           <td>Budi (Teknisi)</td>
-                           <td>Trafo 250 kVA</td>
-                           <td>1 Unit</td>
-                           <td><span class="badge pill-status status-approved">Disetujui</span></td>
-                           <td class="table-actions">-</td>
-                       </tr>
-                   </tbody>
-               </table>
-           </div>
-       </div>
+            <div class="w-full sm:w-auto">
+                {{-- Search Box --}}
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                         <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </div>
+                    <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari permintaan...">
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+
+    {{-- Table --}}
+    <div class="flow-root">
+        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Tanggal</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">User</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Material</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Jumlah</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Status</th>
+                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                <span class="sr-only">Aksi</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        {{-- Table Row 1 --}}
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-slate-500 sm:pl-6">2026-01-07</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-slate-900">User Logistik</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Kabel NYY 4x16mm</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">200 Meter</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                                <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
+                                    Menunggu
+                                </span>
+                            </td>
+                            <td class="relative space-x-2 whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <a href="#" class="rounded-md bg-green-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-green-500">Setuju</a>
+                                <a href="#" class="rounded-md bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500">Tolak</a>
+                            </td>
+                        </tr>
+                        {{-- Table Row 2 --}}
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-slate-500 sm:pl-6">2026-01-06</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-slate-900">Budi (Teknisi)</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Trafo 250 kVA</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">1 Unit</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+                                    Disetujui
+                                </span>
+                            </td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium text-slate-400 sm:pr-6">
+                                -
+                            </td>
+                        </tr>
+                        {{-- More rows... --}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</x-card>
+@endsection
