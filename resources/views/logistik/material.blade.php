@@ -66,8 +66,8 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->satuan }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->stok }}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="/logistik/material/${material.id}/edit" class="text-blue-600 hover:text-blue-900">Edit</a>
-                                <form action="/logistik/material/${material.id}" method="POST" class="inline">
+                                <a href="{{ route('material.edit', $material->id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <form action="{{ route('material.destroy', $material->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus material ini?')">Hapus</button>
@@ -87,6 +87,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.getElementById('search');
         const tableBody = document.getElementById('material-table-body');
+        const editUrlTemplate = '{{ route('material.edit', ['id' => ':id']) }}';
+        const deleteUrlTemplate = '{{ route('material.destroy', ['id' => ':id']) }}';
+        const csrfToken = '{{ csrf_token() }}';
 
         function fetchMaterials(searchQuery) {
             const url = `{{ route('material.index') }}?search=${searchQuery}`;
@@ -110,6 +113,8 @@
 
             if (materials.length > 0) {
                 materials.forEach(material => {
+                    const editUrl = editUrlTemplate.replace(':id', material.id);
+                    const deleteUrl = deleteUrlTemplate.replace(':id', material.id);
                     const row = `
                         <tr>
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">${material.id}</td>
@@ -117,10 +122,10 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.satuan}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.stok}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="/logistik/material/${material.id}/edit" class="text-blue-600 hover:text-blue-900">Edit</a>
-                                <form action="/logistik/material/${material.id}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
+                                <a href="${editUrl}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <form action="${deleteUrl}" method="POST" class="inline">
+                                    <input type="hidden" name="_token" value="${csrfToken}">
+                                    <input type="hidden" name="_method" value="DELETE">
                                     <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus material ini?')">Hapus</button>
                                 </form>
                             </td>
