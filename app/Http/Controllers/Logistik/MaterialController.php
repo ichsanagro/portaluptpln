@@ -18,6 +18,10 @@ class MaterialController extends Controller
             return $query->where('nama_material', 'like', '%' . $search . '%');
         })->get();
 
+        if ($request->ajax()) {
+            return response()->json($materials);
+        }
+
         return view('logistik.material', compact('materials', 'search'));
     }
 

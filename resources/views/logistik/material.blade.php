@@ -29,16 +29,8 @@
             </div>
             <div class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
                 {{-- Search Box --}}
-                <form action="{{ route('material.index') }}" method="GET">
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                             <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                            </svg>
-                        </div>
-                        <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material..." value="{{ $search ?? '' }}">
-                    </div>
-                </form>
+                    <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material..." value="{{ $search ?? '' }}">
+                </div>
                 {{-- Add Button --}}
                 <a href="{{ route('material.create') }}" class="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                     <svg class="-ml-0.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -66,7 +58,7 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white">
+                    <tbody id="material-table-body" class="divide-y divide-slate-200 bg-white">
                         @foreach ($materials as $material)
                         <tr>
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{{ $material->id }}</td>
@@ -74,8 +66,8 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->satuan }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->stok }}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="{{ route('material.edit', $material->id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
-                                <form action="{{ route('material.destroy', $material->id) }}" method="POST" class="inline">
+                                <a href="/logistik/material/${material.id}/edit" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <form action="/logistik/material/${material.id}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus material ini?')">Hapus</button>
@@ -89,4 +81,68 @@
         </div>
     </div>
 </x-card>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('search');
+        const tableBody = document.getElementById('material-table-body');
+
+        function fetchMaterials(searchQuery) {
+            const url = `{{ route('material.index') }}?search=${searchQuery}`;
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateTable(data);
+            })
+            .catch(error => {
+                console.error('Error fetching materials:', error);
+            });
+        }
+
+        function updateTable(materials) {
+            tableBody.innerHTML = '';
+
+            if (materials.length > 0) {
+                materials.forEach(material => {
+                    const row = `
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">${material.id}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.nama_material}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.satuan}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.stok}</td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <a href="/logistik/material/${material.id}/edit" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <form action="/logistik/material/${material.id}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus material ini?')">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            } else {
+                const row = `
+                    <tr>
+                        <td colspan="5" class="whitespace-nowrap px-3 py-4 text-sm text-slate-500 text-center">Tidak ada material yang ditemukan.</td>
+                    </tr>
+                `;
+                tableBody.innerHTML = row;
+            }
+        }
+
+        searchInput.addEventListener('keyup', function () {
+            const searchQuery = this.value;
+            fetchMaterials(searchQuery);
+        });
+    });
+</script>
+@endpush
 @endsection
