@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminLogistik\MaterialController;
+use App\Http\Controllers\Logistik\UserLogistikController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,10 +20,21 @@ Route::post('/login', function (Illuminate\Http\Request $request) {
 
     // Dummy authentication logic
     if ($credentials['email'] === 'adminlogistik@pln.co.id' && $credentials['password'] === 'password123') {
-        // In a real application, you would use Auth::attempt($credentials)
-        // and log the user in.
-        // For now, we simulate success and redirect to the dashboard.
+        session([
+            'user' => [
+                'name' => 'Admin Logistik',
+                'role' => 'adminlogistik'
+            ]
+        ]);
         return redirect()->route('logistik.adminlogistik.dashboard');
+    } elseif ($credentials['email'] === 'userlogistik@pln.co.id' && $credentials['password'] === 'password123') {
+        session([
+            'user' => [
+                'name' => 'User Logistik',
+                'role' => 'userlogistik'
+            ]
+        ]);
+        return redirect()->route('logistik.userlogistik.dashboard');
     }
 
     return back()->withErrors([
@@ -45,4 +57,13 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
     Route::get('/adminlogistik/permintaan', function() {
         return view('logistik.adminlogistik.permintaan');
     })->name('adminlogistik.permintaan');
+
+    // User Logistik Routes
+    Route::prefix('user')->name('userlogistik.')->group(function () {
+        Route::get('/dashboard', [UserLogistikController::class, 'index'])->name('dashboard');
+        Route::get('/peminjaman', [UserLogistikController::class, 'peminjaman'])->name('peminjaman');
+        Route::post('/peminjaman', [UserLogistikController::class, 'storePeminjaman'])->name('peminjaman.store');
+        Route::get('/pengembalian', [UserLogistikController::class, 'pengembalian'])->name('pengembalian');
+    });
 });
+
