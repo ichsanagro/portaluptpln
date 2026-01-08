@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Logistik\MaterialController;
+use App\Http\Controllers\AdminLogistik\MaterialController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,7 +22,7 @@ Route::post('/login', function (Illuminate\Http\Request $request) {
         // In a real application, you would use Auth::attempt($credentials)
         // and log the user in.
         // For now, we simulate success and redirect to the dashboard.
-        return redirect()->route('logistik.dashboard');
+        return redirect()->route('logistik.adminlogistik.dashboard');
     }
 
     return back()->withErrors([
@@ -31,14 +31,18 @@ Route::post('/login', function (Illuminate\Http\Request $request) {
 
 })->name('login.attempt');
 
-Route::get('/logistik/dashboard', function() {
-    return view('logistik.admin_dashboard');
-})->name('logistik.dashboard');
+Route::prefix('logistik')->name('logistik.')->group(function () {
+    Route::get('/adminlogistik/dashboard', function() {
+        return view('logistik.adminlogistik.admin_dashboard');
+    })->name('adminlogistik.dashboard');
 
-Route::resource('/logistik/material', MaterialController::class)->parameters([
-    'material' => 'id'
-]);
+    Route::resource('/adminlogistik/material', MaterialController::class, [
+        'as' => 'adminlogistik'
+    ])->parameters([
+        'material' => 'id'
+    ]);
 
-Route::get('/logistik/permintaan', function() {
-    return view('logistik.permintaan');
-})->name('logistik.permintaan');
+    Route::get('/adminlogistik/permintaan', function() {
+        return view('logistik.adminlogistik.permintaan');
+    })->name('adminlogistik.permintaan');
+});

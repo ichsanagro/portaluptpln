@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Logistik;
+namespace App\Http\Controllers\AdminLogistik;
 
 use App\Http\Controllers\Controller;
 use App\Models\Material;
@@ -22,7 +22,7 @@ class MaterialController extends Controller
             return response()->json($materials);
         }
 
-        return view('logistik.material', compact('materials', 'search'));
+        return view('logistik.adminlogistik.material', compact('materials', 'search'));
     }
 
     /**
@@ -30,7 +30,7 @@ class MaterialController extends Controller
      */
     public function create()
     {
-        return view('logistik.create_material');
+        return view('logistik.adminlogistik.create_material');
     }
 
     /**
@@ -46,7 +46,7 @@ class MaterialController extends Controller
 
         Material::create($request->all());
 
-        return redirect()->route('material.index')->with('success', 'Material berhasil ditambahkan.');
+        return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil ditambahkan.');
     }
 
     /**
@@ -63,7 +63,7 @@ class MaterialController extends Controller
     public function edit(string $id)
     {
         $material = Material::findOrFail($id);
-        return view('logistik.edit_material', compact('material'));
+        return view('logistik.adminlogistik.edit_material', compact('material'));
     }
 
     /**
@@ -80,7 +80,7 @@ class MaterialController extends Controller
         $material = Material::findOrFail($id);
         $material->update($request->all());
 
-        return redirect()->route('material.index')->with('success', 'Material berhasil diperbarui.');
+        return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil diperbarui.');
     }
 
     /**
@@ -91,6 +91,6 @@ class MaterialController extends Controller
         $material = Material::findOrFail($id);
         $material->delete();
 
-        return redirect()->route('material.index')->with('success', 'Material berhasil dihapus.');
+        return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil dihapus.');
     }
 }

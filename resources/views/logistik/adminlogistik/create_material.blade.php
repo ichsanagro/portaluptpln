@@ -8,7 +8,7 @@
         <h3 class="text-xl font-semibold text-slate-800">Tambah Material Baru</h3>
         <p class="mt-1 text-sm text-slate-600">Isi formulir di bawah ini untuk menambahkan material baru.</p>
     </div>
-    <form action="{{ route('material.store') }}" method="POST" class="p-6">
+    <form action="{{ route('logistik.adminlogistik.material.store') }}" method="POST" class="p-6">
         @csrf
         <div class="space-y-6">
             <div>
@@ -49,7 +49,7 @@
             </div>
         </div>
         <div class="mt-6 flex items-center justify-end gap-x-6">
-            <a href="{{ route('material.index') }}" class="text-sm font-semibold leading-6 text-slate-900">Batal</a>
+            <a href="{{ route('logistik.adminlogistik.material.index') }}" class="text-sm font-semibold leading-6 text-slate-900">Batal</a>
             <x-primary-button>
                 Simpan
             </x-primary-button>
