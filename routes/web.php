@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Logistik\MaterialController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,9 +35,9 @@ Route::get('/logistik/dashboard', function() {
     return view('logistik.admin_dashboard');
 })->name('logistik.dashboard');
 
-Route::get('/logistik/material', function() {
-    return view('logistik.material');
-})->name('logistik.material');
+Route::resource('/logistik/material', MaterialController::class)->parameters([
+    'material' => 'id'
+]);
 
 Route::get('/logistik/permintaan', function() {
     return view('logistik.permintaan');

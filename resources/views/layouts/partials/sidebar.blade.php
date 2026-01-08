@@ -18,8 +18,8 @@
             </svg>
             Dashboard
         </a>
-        <a href="{{ route('logistik.material') }}"
-           class="{{ request()->routeIs('logistik.material') ? 'bg-slate-900 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+        <a href="{{ route('material.index') }}"
+           class="{{ request()->routeIs('material.index') ? 'bg-slate-900 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
             <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
             </svg>
