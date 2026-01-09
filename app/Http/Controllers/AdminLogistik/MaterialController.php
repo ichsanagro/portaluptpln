@@ -93,4 +93,51 @@ class MaterialController extends Controller
 
         return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil dihapus.');
     }
+
+    public function permintaan()
+    {
+        // Fetch all pending borrowing requests
+        $permintaanPeminjaman = \App\Models\Peminjaman::where('status', 'pending')
+            ->with(['user', 'details.material'])
+            ->latest()
+            ->get();
+
+        return view('logistik.adminlogistik.permintaan', compact('permintaanPeminjaman'));
+    }
+
+    public function approvePeminjaman(string $id)
+    {
+        $peminjaman = \App\Models\Peminjaman::findOrFail($id);
+        
+        // Only allow approving pending requests
+        if ($peminjaman->status !== 'pending') {
+            return redirect()->back()->withErrors('Permintaan tidak dalam status "pending".');
+        }
+
+        $peminjaman->update(['status' => 'approved']);
+
+        return redirect()->route('logistik.adminlogistik.permintaan')->with('success', 'Permintaan peminjaman berhasil disetujui.');
+    }
+
+    public function rejectPeminjaman(string $id)
+    {
+        $peminjaman = \App\Models\Peminjaman::findOrFail($id);
+
+        // Only allow rejecting pending requests
+        if ($peminjaman->status !== 'pending') {
+            return redirect()->back()->withErrors('Permintaan tidak dalam status "pending".');
+        }
+        
+        // Revert material stock for rejected requests
+        foreach ($peminjaman->details as $detail) {
+            $material = \App\Models\Material::find($detail->material_id);
+            if ($material) {
+                $material->increment('stok', $detail->jumlah);
+            }
+        }
+
+        $peminjaman->update(['status' => 'rejected']);
+
+        return redirect()->route('logistik.adminlogistik.permintaan')->with('success', 'Permintaan peminjaman berhasil ditolak dan stok dikembalikan.');
+    }
 }

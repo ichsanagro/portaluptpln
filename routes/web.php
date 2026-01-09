@@ -55,9 +55,9 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
             'material' => 'id'
         ]);
 
-        Route::get('/adminlogistik/permintaan', function() {
-            return view('logistik.adminlogistik.permintaan');
-        })->name('adminlogistik.permintaan');
+        Route::get('/adminlogistik/permintaan', [MaterialController::class, 'permintaan'])->name('adminlogistik.permintaan');
+        Route::post('/adminlogistik/permintaan/{id}/approve', [MaterialController::class, 'approvePeminjaman'])->name('adminlogistik.permintaan.approve');
+        Route::post('/adminlogistik/permintaan/{id}/reject', [MaterialController::class, 'rejectPeminjaman'])->name('adminlogistik.permintaan.reject');
     });
 
     // User Logistik Routes
@@ -66,6 +66,7 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
         Route::get('/peminjaman', [UserLogistikController::class, 'peminjaman'])->name('peminjaman');
         Route::post('/peminjaman', [UserLogistikController::class, 'storePeminjaman'])->name('peminjaman.store');
         Route::get('/pengembalian', [UserLogistikController::class, 'pengembalian'])->name('pengembalian');
+        Route::get('/riwayat', [UserLogistikController::class, 'riwayatPeminjaman'])->name('riwayat'); // New route for borrowing history
     });
 });
 

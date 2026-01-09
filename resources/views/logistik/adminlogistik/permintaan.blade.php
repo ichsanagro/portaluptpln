@@ -43,38 +43,52 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white">
-                        {{-- Table Row 1 --}}
+                        @forelse ($permintaanPeminjaman as $peminjaman)
                         <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-slate-500 sm:pl-6">2026-01-07</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-slate-900">User Logistik</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Kabel NYY 4x16mm</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">200 Meter</td>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-slate-500 sm:pl-6">
+                                {{ \Carbon\Carbon::parse($peminjaman->tanggal_peminjaman)->format('d M Y H:i') }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-slate-900">
+                                {{ $peminjaman->user->name ?? 'N/A' }}
+                            </td>
+                            <td class="px-3 py-4 text-sm text-slate-500">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    @foreach ($peminjaman->details as $detail)
+                                        <li>{{ $detail->material->nama_material }} ({{ $detail->jumlah }} {{ $detail->material->satuan }})</li>
+                                    @endforeach
+                                </ul>
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $peminjaman->details->sum('jumlah') }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
-                                <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
-                                    Menunggu
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{
+                                    $peminjaman->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                    ($peminjaman->status === 'approved' ? 'bg-green-100 text-green-800' :
+                                    ($peminjaman->status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'))
+                                }}">
+                                    {{ ucfirst($peminjaman->status) }}
                                 </span>
                             </td>
                             <td class="relative space-x-2 whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="#" class="rounded-md bg-green-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-green-500">Setuju</a>
-                                <a href="#" class="rounded-md bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500">Tolak</a>
+                                @if ($peminjaman->status === 'pending')
+                                    <form action="{{ route('logistik.adminlogistik.permintaan.approve', $peminjaman->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="rounded-md bg-green-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-green-500" onclick="return confirm('Anda yakin ingin menyetujui permintaan ini?')">Setuju</button>
+                                    </form>
+                                    <form action="{{ route('logistik.adminlogistik.permintaan.reject', $peminjaman->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="rounded-md bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500" onclick="return confirm('Anda yakin ingin menolak permintaan ini? Stok material akan dikembalikan.')">Tolak</button>
+                                    </form>
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
                             </td>
                         </tr>
-                        {{-- Table Row 2 --}}
-                        <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-slate-500 sm:pl-6">2026-01-06</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-slate-900">Budi (Teknisi)</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">Trafo 250 kVA</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">1 Unit</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
-                                <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
-                                    Disetujui
-                                </span>
-                            </td>
-                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium text-slate-400 sm:pr-6">
-                                -
-                            </td>
-                        </tr>
-                        {{-- More rows... --}}
+                        @empty
+                            <tr>
+                                <td colspan="6" class="p-6 text-center text-gray-500 italic">Tidak ada permintaan peminjaman baru.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

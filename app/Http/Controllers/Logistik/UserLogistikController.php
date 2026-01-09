@@ -35,7 +35,7 @@ class UserLogistikController extends Controller
         ]);
 
         $peminjaman = Peminjaman::create([
-            'user_id' => 2, // Hardcoded user id for userlogistik
+            'user_id' => auth()->id(), // Use authenticated user's ID
             'tanggal_peminjaman' => now(),
             'status' => 'pending',
         ]);
@@ -59,5 +59,22 @@ class UserLogistikController extends Controller
         }
 
         return redirect()->route('logistik.userlogistik.peminjaman')->with('success', 'Permintaan peminjaman berhasil diajukan.');
+    }
+
+    public function riwayatPeminjaman()
+    {
+        // Get the authenticated user's ID
+        $userId = auth()->id(); // This assumes a user is logged in
+        // dd($userId); // Diagnostic 1: Check if userId is correct
+
+        // Fetch all Peminjaman records for the user, eager load details and material info
+        $riwayatPeminjaman = Peminjaman::where('user_id', $userId)
+            ->with(['details.material'])
+            ->latest() // Order by latest borrowings
+            ->get();
+
+        // dd($riwayatPeminjaman); // Diagnostic 2: Check fetched data
+
+        return view('logistik.userlogistik.riwayat', compact('riwayatPeminjaman'));
     }
 }

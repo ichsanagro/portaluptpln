@@ -70,30 +70,36 @@
 
 @section('modal-content')
 {{-- Modal Keranjang Peminjaman --}}
-<div id="peminjaman-modal" class="absolute inset-0 z-20 hidden overflow-y-auto bg-black/30 backdrop-blur-sm">
-    <div class="flex min-h-full items-center justify-center p-4">
-        <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-                <h3 class="text-xl font-semibold text-slate-800">Keranjang Peminjaman Material</h3>
-                <button type="button" id="close-modal-btn" class="text-gray-400 hover:text-gray-500">
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<div id="peminjaman-modal" class="fixed inset-0 z-20 hidden overflow-y-auto bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out opacity-0">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:block sm:p-0">
+        <!-- This is here to "trap" focus -->
+        <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 opacity-0 scale-95 duration-300 ease-out"
+            role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="flex items-center justify-between border-b border-slate-300 px-4 py-3">
+                <h3 class="text-xl font-bold text-slate-800" id="modal-title">Keranjang Peminjaman Material</h3>
+                <button type="button" id="close-modal-btn" class="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition-colors">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
             <form id="peminjaman-form" action="{{ route('logistik.userlogistik.peminjaman.store') }}" method="POST" class="mt-6">
                 @csrf
-                <div id="cart-items-container" class="space-y-4 max-h-80 overflow-y-auto pr-2">
+                <div id="cart-items-container" class="space-y-6 max-h-80 overflow-y-auto pt-4 pb-2">
                     {{-- Item keranjang akan dirender di sini oleh JavaScript --}}
-                    <p class="text-center text-slate-500">Keranjang peminjaman Anda kosong.</p>
+                    <div class="text-center p-6 text-gray-500 italic">
+                        <p class="mb-2">Keranjang peminjaman Anda kosong.</p>
+                        <p class="text-sm">Silakan tambahkan material dari daftar yang tersedia.</p>
+                    </div>
                 </div>
 
                 {{-- Container untuk hidden inputs --}}
                 <div id="hidden-inputs-container"></div>
 
-                <div class="mt-6 flex items-center justify-end gap-x-6">
-                    <button type="button" id="cancel-btn" class="text-sm font-semibold leading-6 text-slate-900">Batal</button>
-                    <button type="submit" id="submit-peminjaman-btn" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50" disabled>
+                <div class="mt-6 flex items-center justify-end gap-x-3">
+                    <button type="button" id="cancel-btn" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Batal</button>
+                    <button type="submit" id="submit-peminjaman-btn" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50" disabled>
                         Ajukan Peminjaman
                     </button>
                 </div>
@@ -148,22 +154,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
         peminjamanCart.forEach(item => {
             const itemElement = document.createElement('div');
-            itemElement.classList.add('cart-item', 'flex', 'items-center', 'gap-4', 'border-b', 'pb-4');
+            itemElement.classList.add('cart-item', 'flex', 'items-center', 'gap-x-4', 'py-4', 'border-b', 'border-gray-100', 'last:border-b-0');
             itemElement.dataset.id = item.id;
 
             itemElement.innerHTML = `
                 <div class="flex-1">
-                    <p class="font-semibold text-slate-800">${item.nama}</p>
-                    <p class="text-sm text-slate-500">Stok tersedia: ${item.stok}</p>
+                    <p class="font-medium text-gray-800">${item.nama}</p>
+                    <p class="text-sm text-gray-500">Stok: ${item.stok} ${item.satuan}</p>
                 </div>
-                <div class="w-1/4">
+                <div class="flex items-center w-28">
+                    <button type="button" class="quantity-minus-btn p-1 rounded-l-md border border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors disabled:opacity-50" data-id="${item.id}" ${item.jumlah <= 1 ? 'disabled' : ''}>
+                        <svg class="h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                        </svg>
+                    </button>
                     <label for="jumlah_${item.id}" class="sr-only">Jumlah</label>
                     <input type="number" id="jumlah_${item.id}" value="${item.jumlah}" min="1" max="${item.stok}"
-                           class="cart-item-jumlah block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+                           class="cart-item-jumlah block w-full border-t border-b border-gray-300 p-2 text-center text-sm focus:ring-blue-500 focus:border-blue-500"
                            required>
+                    <button type="button" class="quantity-plus-btn p-1 rounded-r-md border border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors disabled:opacity-50" data-id="${item.id}" ${item.jumlah >= item.stok ? 'disabled' : ''}>
+                        <svg class="h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
                 </div>
-                <button type="button" class="remove-from-cart-btn rounded-md bg-red-500 px-3 py-2 text-white hover:bg-red-600" data-id="${item.id}">
-                    &times;
+                <button type="button" class="remove-from-cart-btn text-gray-400 hover:text-red-500 p-2 rounded-full transition-colors" data-id="${item.id}">
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             `;
             cartItemsContainer.appendChild(itemElement);
@@ -216,6 +234,18 @@ document.addEventListener('DOMContentLoaded', function () {
             // Update nilai inputnya juga untuk konsistensi jika user mengetik nilai invalid
             const inputElement = document.getElementById(`jumlah_${materialId}`);
             if(inputElement) inputElement.value = quantity;
+
+            // Update disabled state of plus/minus buttons
+            const cartItemElement = inputElement.closest('.cart-item');
+            const minusBtn = cartItemElement.querySelector('.quantity-minus-btn');
+            const plusBtn = cartItemElement.querySelector('.quantity-plus-btn');
+
+            if (minusBtn) {
+                minusBtn.disabled = (quantity <= 1);
+            }
+            if (plusBtn) {
+                plusBtn.disabled = (quantity >= maxStok);
+            }
         }
     }
 
@@ -258,11 +288,27 @@ document.addEventListener('DOMContentLoaded', function () {
     openModalBtn.addEventListener('click', () => {
         renderCartItems();
         modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0'); // Remove backdrop initial opacity
+            modal.classList.add('opacity-100'); // Add backdrop final opacity
+            modal.querySelector('.inline-block').classList.remove('opacity-0', 'scale-95'); // Actual modal content transition
+            modal.querySelector('.inline-block').classList.add('opacity-100', 'scale-100');
+        }, 50); // Small delay to allow 'hidden' removal to register
     });
 
     // Tutup Modal
-    closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
-    cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    const closeModal = () => {
+        modal.classList.remove('opacity-100'); // Remove backdrop final opacity
+        modal.classList.add('opacity-0'); // Add backdrop initial opacity
+        modal.querySelector('.inline-block').classList.remove('opacity-100', 'scale-100'); // Actual modal content transition
+        modal.querySelector('.inline-block').classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300); // Match transition duration
+    };
+
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
 
     // Klik tombol "Pinjam" di tabel
     tableBody.addEventListener('click', function (e) {
@@ -281,14 +327,38 @@ document.addEventListener('DOMContentLoaded', function () {
     cartItemsContainer.addEventListener('change', function(e) {
         if (e.target.classList.contains('cart-item-jumlah')) {
             const materialId = e.target.closest('.cart-item').dataset.id;
-            updateCartItemQuantity(materialId, e.target.value);
+            updateCartItemQuantity(materialId, parseInt(e.target.value, 10)); // Ensure it's an integer
         }
     });
 
     cartItemsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-from-cart-btn')) {
-            const materialId = e.target.dataset.id;
+        // Remove button click
+        if (e.target.closest('.remove-from-cart-btn')) {
+            const materialId = e.target.closest('.remove-from-cart-btn').dataset.id;
             removeFromCart(materialId);
+        }
+
+        // Minus button click
+        if (e.target.closest('.quantity-minus-btn')) {
+            const materialId = e.target.closest('.quantity-minus-btn').dataset.id;
+            const inputElement = document.getElementById(`jumlah_${materialId}`);
+            let currentQuantity = parseInt(inputElement.value, 10);
+            if (currentQuantity > 1) {
+                updateCartItemQuantity(materialId, currentQuantity - 1);
+            }
+        }
+
+        // Plus button click
+        if (e.target.closest('.quantity-plus-btn')) {
+            const materialId = e.target.closest('.quantity-plus-btn').dataset.id;
+            const inputElement = document.getElementById(`jumlah_${materialId}`);
+            let currentQuantity = parseInt(inputElement.value, 10);
+            const item = peminjamanCart.find(item => item.id == materialId);
+            if (item && currentQuantity < item.stok) {
+                updateCartItemQuantity(materialId, currentQuantity + 1);
+            } else if (item && currentQuantity >= item.stok) {
+                alert(`Jumlah peminjaman tidak boleh melebihi stok yang tersedia (${item.stok}).`);
+            }
         }
     });
 

@@ -61,6 +61,13 @@
                 </svg>
                 Pengembalian
             </a>
+            <a href="{{ route('logistik.userlogistik.riwayat') }}"
+               class="{{ request()->routeIs('logistik.userlogistik.riwayat') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+                <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.079 0-2.157.26-3.174.743zM12 6.042V12m0-5.958a8.967 8.967 0 016-2.292c1.079 0 2.157.26 3.174.743m0 0-1.584 1.584m-4.718-4.718L12 6.042M12 12l-3.75 3.75M12 12l3.75 3.75M12 12V21M12 21c-1.079 0-2.157-.26-3.174-.743L12 21h4.474c.305 0 .597-.04.883-.114M12 21h.008v.008H12z" />
+                </svg>
+                Riwayat Peminjaman
+            </a>
         @endif
     </nav>
 

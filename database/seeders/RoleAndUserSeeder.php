@@ -42,6 +42,12 @@ class RoleAndUserSeeder extends Seeder
             'password' => Hash::make('password123'),
         ]);
         $userLogistik->assignRole($userLogistikRole);
+        // Create User Logistik User
+        $userLogistik = User::firstOrCreate(['email' => 'userlogistik2@pln.co.id'], [
+            'name' => 'User Logistik',
+            'password' => Hash::make('password123'),
+        ]);
+        $userLogistik->assignRole($userLogistikRole);
 
         // Create HSE roles
         $adminHseRole = Role::firstOrCreate(['name' => 'admin hse']);
