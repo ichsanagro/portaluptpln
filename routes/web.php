@@ -3,6 +3,9 @@
 use App\Http\Controllers\AdminLogistik\MaterialController;
 use App\Http\Controllers\Logistik\UserLogistikController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Hse\AdminHseController;
+use App\Http\Controllers\Hse\UserHseController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,48 +21,47 @@ Route::post('/login', function (Illuminate\Http\Request $request) {
         'password' => ['required'],
     ]);
 
-    // Dummy authentication logic
-    if ($credentials['email'] === 'adminlogistik@pln.co.id' && $credentials['password'] === 'password123') {
-        session([
-            'user' => [
-                'name' => 'Admin Logistik',
-                'role' => 'adminlogistik'
-            ]
-        ]);
-        return redirect()->route('logistik.adminlogistik.dashboard');
-    } elseif ($credentials['email'] === 'userlogistik@pln.co.id' && $credentials['password'] === 'password123') {
-        session([
-            'user' => [
-                'name' => 'User Logistik',
-                'role' => 'userlogistik'
-            ]
-        ]);
-        return redirect()->route('logistik.userlogistik.dashboard');
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+        $user = Auth::user();
+
+        if ($user->hasRole('admin logistik')) {
+            return redirect()->route('logistik.adminlogistik.dashboard');
+        } elseif ($user->hasRole('user logistik')) {
+            return redirect()->route('logistik.userlogistik.dashboard');
+        } elseif ($user->hasRole('admin hse')) {
+            return redirect()->route('hse.admin_dashboard');
+        } elseif ($user->hasRole('user hse')) {
+            return redirect()->route('hse.dashboard');
+        }
+
+        return redirect()->intended('/');
     }
 
     return back()->withErrors([
         'email' => 'The provided credentials do not match our records.',
     ])->onlyInput('email');
-
 })->name('login.attempt');
 
 Route::prefix('logistik')->name('logistik.')->group(function () {
-    Route::get('/adminlogistik/dashboard', function() {
-        return view('logistik.adminlogistik.admin_dashboard');
-    })->name('adminlogistik.dashboard');
+    Route::middleware(['auth', 'role:admin logistik'])->group(function () {
+        Route::get('/adminlogistik/dashboard', function() {
+            return view('logistik.adminlogistik.admin_dashboard');
+        })->name('adminlogistik.dashboard');
 
-    Route::resource('/adminlogistik/material', MaterialController::class, [
-        'as' => 'adminlogistik'
-    ])->parameters([
-        'material' => 'id'
-    ]);
+        Route::resource('/adminlogistik/material', MaterialController::class, [
+            'as' => 'adminlogistik'
+        ])->parameters([
+            'material' => 'id'
+        ]);
 
-    Route::get('/adminlogistik/permintaan', function() {
-        return view('logistik.adminlogistik.permintaan');
-    })->name('adminlogistik.permintaan');
+        Route::get('/adminlogistik/permintaan', function() {
+            return view('logistik.adminlogistik.permintaan');
+        })->name('adminlogistik.permintaan');
+    });
 
     // User Logistik Routes
-    Route::prefix('user')->name('userlogistik.')->group(function () {
+    Route::middleware(['auth', 'role:user logistik'])->prefix('user')->name('userlogistik.')->group(function () {
         Route::get('/dashboard', [UserLogistikController::class, 'index'])->name('dashboard');
         Route::get('/peminjaman', [UserLogistikController::class, 'peminjaman'])->name('peminjaman');
         Route::post('/peminjaman', [UserLogistikController::class, 'storePeminjaman'])->name('peminjaman.store');
@@ -67,3 +69,14 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
     });
 });
 
+Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
+    // Admin HSE Dashboard
+    Route::middleware('role:admin hse')->group(function () {
+        Route::get('/admin/dashboard', [AdminHseController::class, 'dashboard'])->name('admin_dashboard');
+    });
+
+    // User HSE Dashboard
+    Route::middleware('role:user hse')->group(function () {
+        Route::get('/dashboard', [UserHseController::class, 'dashboard'])->name('dashboard');
+    });
+});

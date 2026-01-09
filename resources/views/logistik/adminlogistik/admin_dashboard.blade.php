@@ -6,20 +6,20 @@
     <div class="space-y-8">
         {{-- Welcome Header --}}
         <x-card class="p-6">
-            <h2 class="text-2xl font-bold text-slate-800">Selamat Datang, Admin Logistik!</h2>
-            <p class="mt-1 text-slate-600">Berikut adalah ringkasan aktivitas logistik terkini di sistem Anda.</p>
+            <h2 class="text-2xl font-bold text-blue-800">Selamat Datang, Admin Logistik!</h2>
+            <p class="mt-1 text-gray-700">Berikut adalah ringkasan aktivitas logistik terkini di sistem Anda.</p>
         </x-card>
 
         {{-- Stats Cards --}}
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <x-stat-card title="Total Material" value="1,250" icon_bg_color="bg-blue-100" icon_text_color="text-blue-600">
+            <x-stat-card title="Total Material" value="1,250" icon_bg_color="bg-blue-100" icon_text_color="text-blue-800">
                 <x-slot name="icon">
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                     </svg>
                 </x-slot>
             </x-stat-card>
-            <x-stat-card title="Permintaan Pending" value="12" icon_bg_color="bg-yellow-100" icon_text_color="text-yellow-600">
+            <x-stat-card title="Permintaan Pending" value="12" icon_bg_color="bg-yellow-100" icon_text_color="text-yellow-800">
                 <x-slot name="icon">
                      <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
