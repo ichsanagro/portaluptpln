@@ -23,7 +23,61 @@ class UserLogistikController extends Controller
 
     public function pengembalian()
     {
-        return view('logistik.userlogistik.pengembalian');
+        $userId = auth()->id();
+
+        $itemsToReturn = PeminjamanDetail::whereHas('peminjaman', function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                      ->where('status', 'approved'); // Only approved borrowings can be returned
+            })
+            ->whereColumn('jumlah', '>', 'returned_jumlah') // Only items not fully returned
+            ->with(['peminjaman', 'material'])
+            ->get();
+            
+        return view('logistik.userlogistik.pengembalian', compact('itemsToReturn'));
+    }
+
+    public function storePengembalian(Request $request)
+    {
+        $request->validate([
+            'returns' => 'required|array|min:1',
+            'returns.*.peminjaman_detail_id' => 'required|exists:peminjaman_details,id',
+            'returns.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        foreach ($request->returns as $returnData) {
+            $peminjamanDetail = PeminjamanDetail::findOrFail($returnData['peminjaman_detail_id']);
+            $material = Material::findOrFail($peminjamanDetail->material_id);
+
+            $quantityToReturn = $returnData['quantity'];
+            $remainingToReturn = $peminjamanDetail->jumlah - $peminjamanDetail->returned_jumlah;
+
+            if ($quantityToReturn > $remainingToReturn) {
+                return redirect()->back()->withErrors('Jumlah pengembalian untuk ' . $material->nama_material . ' melebihi jumlah yang belum dikembalikan.')->withInput();
+            }
+
+            // Update returned_jumlah in PeminjamanDetail
+            $peminjamanDetail->increment('returned_jumlah', $quantityToReturn);
+            // Increment material stock
+            $material->increment('stok', $quantityToReturn);
+            
+            // Check if this PeminjamanDetail is fully returned
+            if ($peminjamanDetail->jumlah === $peminjamanDetail->returned_jumlah) {
+                // Optionally update a status for PeminjamanDetail if needed, e.g., 'completed'
+                // For simplicity, we just rely on 'jumlah' vs 'returned_jumlah' for now.
+            }
+        }
+
+        // After updating all details, check if the parent Peminjaman is fully returned
+        $peminjaman = $peminjamanDetail->peminjaman; // Get the parent peminjaman from the last detail
+        $allDetailsReturned = $peminjaman->details->every(function ($detail) {
+            return $detail->jumlah === $detail->returned_jumlah;
+        });
+
+        if ($allDetailsReturned) {
+            $peminjaman->update(['status' => 'completed']);
+        }
+
+        return redirect()->route('logistik.userlogistik.pengembalian')->with('success', 'Material berhasil dikembalikan.');
     }
 
     public function storePeminjaman(Request $request)
