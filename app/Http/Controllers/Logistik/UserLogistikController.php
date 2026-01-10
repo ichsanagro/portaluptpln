@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Material;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanDetail;
+use App\Models\User;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserLogistikController extends Controller
 {
@@ -94,6 +97,7 @@ class UserLogistikController extends Controller
             'status' => 'pending',
         ]);
 
+        $materialList = [];
         foreach ($request->materials as $materialData) {
             $material = Material::find($materialData['id']);
             if ($material->stok < $materialData['jumlah']) {
@@ -110,9 +114,73 @@ class UserLogistikController extends Controller
 
             // Decrement stock
             $material->decrement('stok', $materialData['jumlah']);
+            
+            // Collect material info for notification
+            $materialList[] = "- {$material->nama_material}: {$materialData['jumlah']} {$material->satuan}";
         }
 
+        // Send WhatsApp notification to admin logistik
+        $this->sendPeminjamanNotification($peminjaman, $materialList);
+
         return redirect()->route('logistik.userlogistik.peminjaman')->with('success', 'Permintaan peminjaman berhasil diajukan.');
+    }
+
+    /**
+     * Send WhatsApp notification to admin logistik about new peminjaman
+     */
+    private function sendPeminjamanNotification(Peminjaman $peminjaman, array $materialList)
+    {
+        try {
+            // Get all admin logistik users
+            $adminLogistikUsers = User::role('admin logistik')->get();
+
+            if ($adminLogistikUsers->isEmpty()) {
+                Log::warning('No admin logistik users found to send notification');
+                return;
+            }
+
+            $whatsappService = new WhatsAppService();
+            $user = auth()->user();
+            
+            // Format the message
+            $materialsText = implode("\n", $materialList);
+            $message = "*NOTIFIKASI PEMINJAMAN MATERIAL BARU*\n\n";
+            $message .= "📋 *ID Peminjaman:* {$peminjaman->id}\n";
+            $message .= "👤 *Peminjam:* {$user->name}\n";
+            $message .= "📧 *Email:* {$user->email}\n";
+            $message .= "📅 *Tanggal:* " . $peminjaman->tanggal_peminjaman->format('d M Y H:i') . "\n";
+            $message .= "📊 *Status:* Pending\n\n";
+            $message .= "*Material yang Dipinjam:*\n{$materialsText}\n\n";
+            $message .= "Silakan cek sistem untuk menyetujui atau menolak peminjaman ini.";
+
+            // Send to all admin logistik
+            foreach ($adminLogistikUsers as $admin) {
+                if (!empty($admin->phone)) {
+                    $formattedPhone = WhatsAppService::formatPhoneNumber($admin->phone);
+                    $result = $whatsappService->sendMessage($formattedPhone, $message);
+                    
+                    if ($result['success']) {
+                        Log::info("WhatsApp notification sent to admin: {$admin->name}", [
+                            'peminjaman_id' => $peminjaman->id,
+                            'admin_phone' => $formattedPhone
+                        ]);
+                    } else {
+                        Log::error("Failed to send WhatsApp notification to admin: {$admin->name}", [
+                            'peminjaman_id' => $peminjaman->id,
+                            'admin_phone' => $formattedPhone,
+                            'error' => $result['error']
+                        ]);
+                    }
+                } else {
+                    Log::warning("Admin logistik {$admin->name} does not have a phone number");
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error sending peminjaman notification', [
+                'peminjaman_id' => $peminjaman->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function riwayatPeminjaman()

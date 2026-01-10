@@ -32,6 +32,7 @@ class RoleAndUserSeeder extends Seeder
         // Create Admin Logistik User
         $adminLogistik = User::firstOrCreate(['email' => 'adminlogistik@pln.co.id'], [
             'name' => 'Admin Logistik',
+            'phone' => null, // Admin harus mengisi nomor telepon sendiri
             'password' => Hash::make('password123'),
         ]);
         $adminLogistik->assignRole($adminLogistikRole);
