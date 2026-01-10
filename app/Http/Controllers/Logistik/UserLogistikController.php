@@ -93,7 +93,6 @@ class UserLogistikController extends Controller
 
         $peminjaman = Peminjaman::create([
             'user_id' => auth()->id(), // Use authenticated user's ID
-            'tanggal_peminjaman' => now(),
             'status' => 'pending',
         ]);
 
@@ -148,7 +147,7 @@ class UserLogistikController extends Controller
             $message .= "📋 *ID Peminjaman:* {$peminjaman->id}\n";
             $message .= "👤 *Peminjam:* {$user->name}\n";
             $message .= "📧 *Email:* {$user->email}\n";
-            $message .= "📅 *Tanggal:* " . $peminjaman->tanggal_peminjaman->format('d M Y H:i') . "\n";
+            $message .= "📅 *Tanggal:* " . $peminjaman->created_at->format('d M Y H:i') . "\n";
             $message .= "📊 *Status:* Pending\n\n";
             $message .= "*Material yang Dipinjam:*\n{$materialsText}\n\n";
             $message .= "Silakan cek sistem untuk menyetujui atau menolak peminjaman ini.";

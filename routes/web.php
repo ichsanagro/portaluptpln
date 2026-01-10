@@ -53,7 +53,7 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
             'as' => 'adminlogistik'
         ])->parameters([
             'material' => 'id'
-        ]);
+        ])->except(['create', 'show']);
 
         Route::get('/adminlogistik/permintaan', [MaterialController::class, 'permintaan'])->name('adminlogistik.permintaan');
         Route::post('/adminlogistik/permintaan/{id}/approve', [MaterialController::class, 'approvePeminjaman'])->name('adminlogistik.permintaan.approve');

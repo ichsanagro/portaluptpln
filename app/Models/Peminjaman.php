@@ -13,7 +13,6 @@ class Peminjaman extends Model
 
     protected $fillable = [
         'user_id',
-        'tanggal_peminjaman',
         'status',
     ];
 

@@ -19,21 +19,13 @@ class MaterialController extends Controller
         })->get();
 
         if ($request->ajax()) {
-            return response()->json($materials);
+            return response()->json(['materials' => $materials]);
         }
 
         return view('logistik.adminlogistik.material', compact('materials', 'search'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('logistik.adminlogistik.create_material');
-    }
-
-    /**
+/**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -49,15 +41,7 @@ class MaterialController extends Controller
         return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
+/**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)

@@ -19,6 +19,30 @@
             </div>
         </div>
     @endif
+    
+    {{-- Error Messages --}}
+    @if ($errors->any())
+        <div class="rounded-md bg-red-50 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Terdapat {{ $errors->count() }} error dengan input Anda</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <ul role="list" class="list-disc space-y-1 pl-5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
 
     {{-- Card Header --}}
     <div class="border-b border-slate-200 p-6">
@@ -29,15 +53,20 @@
             </div>
             <div class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
                 {{-- Search Box --}}
+                <div class="relative w-full sm:w-auto">
+                    <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 transform text-slate-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
                     <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material..." value="{{ $search ?? '' }}">
                 </div>
+
                 {{-- Add Button --}}
-                <a href="{{ route('logistik.adminlogistik.material.create') }}" class="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                <button type="button" id="open-modal-btn" class="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                     <svg class="-ml-0.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                     </svg>
                     <span>Tambah Material</span>
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -82,15 +111,145 @@
     </div>
 </x-card>
 
+{{-- Modal Tambah Material --}}
+<div id="tambah-material-modal" class="fixed inset-0 z-20 hidden overflow-y-auto bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out opacity-0">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:block sm:p-0">
+        <!-- This is here to "trap" focus -->
+        <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 opacity-0 scale-95 duration-300 ease-out"
+            role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="flex items-center justify-between border-b border-slate-300 pb-4">
+                <h3 class="text-xl font-bold text-slate-800" id="modal-title">Tambah Material Baru</h3>
+                <button type="button" id="close-modal-btn" class="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition-colors">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form action="{{ route('logistik.adminlogistik.material.store') }}" method="POST" class="mt-6">
+                @csrf
+                <div class="space-y-6">
+                    <div>
+                        <x-input-label for="nama_material" value="Nama Material" />
+                        <div class="mt-2">
+                            <x-text-input
+                                id="nama_material"
+                                name="nama_material"
+                                type="text"
+                                required
+                                placeholder="Masukkan nama material"
+                                value="{{ old('nama_material') }}"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <x-input-label for="satuan" value="Satuan" />
+                        <div class="mt-2">
+                            <x-text-input
+                                id="satuan"
+                                name="satuan"
+                                type="text"
+                                required
+                                placeholder="Contoh: Meter, Unit, Buah"
+                                value="{{ old('satuan') }}"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <x-input-label for="stok" value="Stok Awal" />
+                        <div class="mt-2">
+                            <x-text-input
+                                id="stok"
+                                name="stok"
+                                type="number"
+                                required
+                                placeholder="Masukkan jumlah stok awal"
+                                value="{{ old('stok') }}"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex items-center justify-end gap-x-3">
+                    <button type="button" id="cancel-btn" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Batal</button>
+                    <x-primary-button>
+                        Simpan
+                    </x-primary-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // --- MODAL ELEMENTS ---
+        const modal = document.getElementById('tambah-material-modal');
+        const openModalBtn = document.getElementById('open-modal-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+
+        // --- SEARCH ELEMENTS ---
         const searchInput = document.getElementById('search');
         const tableBody = document.getElementById('material-table-body');
         const editUrlTemplate = '{{ route('logistik.adminlogistik.material.edit', ['id' => ':id']) }}';
         const deleteUrlTemplate = '{{ route('logistik.adminlogistik.material.destroy', ['id' => ':id']) }}';
         const csrfToken = '{{ csrf_token() }}';
 
+        // --- MODAL FUNCTIONS ---
+        const openModal = () => {
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('[role="dialog"]').classList.remove('opacity-0', 'scale-95');
+            }, 50);
+        };
+
+        const closeModal = () => {
+            if (!modal) return;
+            modal.classList.add('opacity-0');
+            modal.querySelector('[role="dialog"]').classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // Match transition duration
+        };
+
+        // --- MODAL EVENT LISTENERS ---
+        if (openModalBtn) {
+            openModalBtn.addEventListener('click', openModal);
+        }
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeModal);
+        }
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeModal);
+        }
+        // Close modal on escape key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+        // Close modal on outside click
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+        
+        // --- Handle form validation errors ---
+        // If there are validation errors, the page reloads. We check for this and re-open the modal.
+        @if ($errors->any())
+            openModal();
+        @endif
+
+
+        // --- SEARCH FUNCTIONS ---
         function fetchMaterials(searchQuery) {
             const url = `{{ route('logistik.adminlogistik.material.index') }}?search=${searchQuery}`;
 
@@ -101,7 +260,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                updateTable(data);
+                updateTable(data.materials);
             })
             .catch(error => {
                 console.error('Error fetching materials:', error);
@@ -109,6 +268,7 @@
         }
 
         function updateTable(materials) {
+            if (!tableBody) return;
             tableBody.innerHTML = '';
 
             if (materials.length > 0) {
@@ -142,12 +302,18 @@
                 tableBody.innerHTML = row;
             }
         }
-
-        searchInput.addEventListener('keyup', function () {
-            const searchQuery = this.value;
-            fetchMaterials(searchQuery);
-        });
+        
+        // --- SEARCH EVENT LISTENER ---
+        if (searchInput) {
+            let debounceTimer;
+            searchInput.addEventListener('keyup', function () {
+                const searchQuery = this.value;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    fetchMaterials(searchQuery);
+                }, 300); // 300ms delay
+            });
+        }
     });
 </script>
 @endpush
-@endsection

@@ -46,7 +46,7 @@
                         @forelse ($permintaanPeminjaman as $peminjaman)
                         <tr>
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-slate-500 sm:pl-6">
-                                {{ \Carbon\Carbon::parse($peminjaman->tanggal_peminjaman)->format('d M Y H:i') }}
+                                {{ \Carbon\Carbon::parse($peminjaman->created_at)->format('d M Y H:i') }}
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-slate-900">
                                 {{ $peminjaman->user->name ?? 'N/A' }}
