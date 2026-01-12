@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', '')
+
+@push('header-items')
+    @include('components.hse-stats')
+@endpush
 
 @section('content')
     <div class="space-y-8">

@@ -1,10 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard User Logistik')
+@section('title', '')
+
+@push('header-items')
+    @include('components.hse-stats')
+@endpush
 
 @section('content')
 <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4 text-blue-800">Selamat Datang, User Logistik!</h1>
-    <p class="text-gray-700">Ini adalah halaman dashboard untuk pengguna logistik. Anda dapat melihat ringkasan peminjaman dan pengembalian material di sini.</p>
+    {{-- Content specific to Logistik User Dashboard --}}
+    <h2 class="text-xl font-bold mb-4 text-gray-800 mt-6">Konten Logistik Lainnya</h2>
+    <p class="text-gray-700">Ini adalah area untuk konten spesifik logistik Anda.</p>
 </div>
 @endsection
