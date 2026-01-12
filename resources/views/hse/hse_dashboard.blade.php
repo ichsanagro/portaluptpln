@@ -44,14 +44,6 @@
 
             // --- Utility Functions ---
 
-            // Custom function to get Day of Year (0-indexed)
-            function getDayOfYear(date) {
-                const start = new Date(date.getFullYear(), 0, 0);
-                const diff = date.getTime() - start.getTime();
-                const oneDay = 1000 * 60 * 60 * 24;
-                return Math.floor(diff / oneDay);
-            }
-
             // Check if a date is a working day (Monday-Friday)
             function isWorkingDay(date) {
                 const dayOfWeek = date.getDay();
@@ -60,14 +52,33 @@
 
             function calculateWorkingDaysThisYear() {
                 const today = new Date();
-                const currentYear = today.getFullYear();
+                today.setHours(0, 0, 0, 0);
+
+                const startDateString = localStorage.getItem('hseStartDate');
+                let startDate;
+
+                if (startDateString) {
+                    // new Date('YYYY-MM-DD') can be off by a day due to timezone, so parse manually
+                    const parts = startDateString.split('-').map(Number);
+                    startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                } else {
+                    startDate = new Date(today.getFullYear(), 0, 1); // Default to Jan 1st of current year
+                }
+                
+                startDate.setHours(0, 0, 0, 0);
+
                 let workingDays = 0;
-                // Loop from Jan 1st to today (inclusive)
-                for (let i = 0; i <= getDayOfYear(today); i++) {
-                    const date = new Date(currentYear, 0, i + 1); // i+1 because getDayOfYear is 0-indexed for 0
-                    if (isWorkingDay(date)) {
+                if (today < startDate) {
+                    workingDaysThisYear.textContent = 0;
+                    return;
+                }
+
+                let currentDate = new Date(startDate);
+                while (currentDate <= today) {
+                    if (isWorkingDay(currentDate)) {
                         workingDays++;
                     }
+                    currentDate.setDate(currentDate.getDate() + 1);
                 }
                 workingDaysThisYear.textContent = workingDays;
             }
@@ -121,7 +132,7 @@
             setInterval(updateClock, 1000);
             updateClock(); // Initial call to display immediately
 
-            // Calculate working days this year
+            // Calculate working days this year using potentially custom start date
             calculateWorkingDaysThisYear();
 
             // Load saved data and handle auto-increment
