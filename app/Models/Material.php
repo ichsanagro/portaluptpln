@@ -13,5 +13,7 @@ class Material extends Model
         'nama_material',
         'satuan',
         'stok',
+        'spesifikasi',
+        'foto',
     ];
 }

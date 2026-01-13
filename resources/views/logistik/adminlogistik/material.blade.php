@@ -95,7 +95,8 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->satuan }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->stok }}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="{{ route('logistik.adminlogistik.material.edit', $material->id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <button type="button" onclick="viewMaterial({{ $material->id }})" class="text-green-600 hover:text-green-900">Lihat</button>
+                                <a href="{{ route('logistik.adminlogistik.material.edit', $material->id) }}" class="ml-4 text-blue-600 hover:text-blue-900">Edit</a>
                                 <form action="{{ route('logistik.adminlogistik.material.destroy', $material->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
@@ -126,7 +127,7 @@
                     </svg>
                 </button>
             </div>
-            <form action="{{ route('logistik.adminlogistik.material.store') }}" method="POST" class="mt-6">
+            <form action="{{ route('logistik.adminlogistik.material.store') }}" method="POST" enctype="multipart/form-data" class="mt-6">
                 @csrf
                 <div class="space-y-6">
                     <div>
@@ -168,6 +169,31 @@
                             />
                         </div>
                     </div>
+                    <div>
+                        <x-input-label for="spesifikasi" value="Spesifikasi" />
+                        <div class="mt-2">
+                            <textarea
+                                id="spesifikasi"
+                                name="spesifikasi"
+                                rows="3"
+                                class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                                placeholder="Masukkan spesifikasi material (opsional)"
+                            >{{ old('spesifikasi') }}</textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <x-input-label for="foto" value="Foto Material" />
+                        <div class="mt-2">
+                            <input
+                                id="foto"
+                                name="foto"
+                                type="file"
+                                accept="image/*"
+                                class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                            <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF (Max: 2MB)</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="mt-8 flex items-center justify-end gap-x-3">
                     <button type="button" id="cancel-btn" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Batal</button>
@@ -176,6 +202,57 @@
                     </x-primary-button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+{{-- Modal Lihat Detail Material --}}
+<div id="detail-material-modal" class="fixed inset-0 z-20 hidden overflow-y-auto bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out opacity-0">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:block sm:p-0">
+        <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6 opacity-0 scale-95 duration-300 ease-out"
+            role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+            <div class="flex items-center justify-between border-b border-slate-300 pb-4">
+                <h3 class="text-xl font-bold text-slate-800" id="detail-modal-title">Detail Material</h3>
+                <button type="button" id="close-detail-modal-btn" class="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition-colors">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">ID</label>
+                        <p id="detail-id" class="mt-1 text-sm text-slate-900"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Stok</label>
+                        <p id="detail-stok" class="mt-1 text-sm text-slate-900"></p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Nama Material</label>
+                    <p id="detail-nama" class="mt-1 text-sm text-slate-900"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Satuan</label>
+                    <p id="detail-satuan" class="mt-1 text-sm text-slate-900"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Spesifikasi</label>
+                    <p id="detail-spesifikasi" class="mt-1 text-sm text-slate-900 whitespace-pre-line"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Foto Material</label>
+                    <div id="detail-foto-container" class="mt-2">
+                        <img id="detail-foto" src="" alt="Foto Material" class="max-w-full h-auto rounded-lg shadow-md" style="max-height: 400px;">
+                        <p id="detail-no-foto" class="text-sm text-slate-500 italic hidden">Tidak ada foto</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-end">
+                <button type="button" id="close-detail-btn" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Tutup</button>
+            </div>
         </div>
     </div>
 </div>
@@ -190,6 +267,11 @@
         const openModalBtn = document.getElementById('open-modal-btn');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const cancelBtn = document.getElementById('cancel-btn');
+
+        // --- DETAIL MODAL ELEMENTS ---
+        const detailModal = document.getElementById('detail-material-modal');
+        const closeDetailModalBtn = document.getElementById('close-detail-modal-btn');
+        const closeDetailBtn = document.getElementById('close-detail-btn');
 
         // --- SEARCH ELEMENTS ---
         const searchInput = document.getElementById('search');
@@ -241,6 +323,95 @@
                 }
             });
         }
+
+        // --- DETAIL MODAL FUNCTIONS ---
+        const openDetailModal = () => {
+            if (!detailModal) return;
+            detailModal.classList.remove('hidden');
+            setTimeout(() => {
+                detailModal.classList.remove('opacity-0');
+                detailModal.querySelector('[role="dialog"]').classList.remove('opacity-0', 'scale-95');
+            }, 50);
+        };
+
+        const closeDetailModal = () => {
+            if (!detailModal) return;
+            detailModal.classList.add('opacity-0');
+            detailModal.querySelector('[role="dialog"]').classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                detailModal.classList.add('hidden');
+            }, 300);
+        };
+
+        // --- DETAIL MODAL EVENT LISTENERS ---
+        if (closeDetailModalBtn) {
+            closeDetailModalBtn.addEventListener('click', closeDetailModal);
+        }
+        if (closeDetailBtn) {
+            closeDetailBtn.addEventListener('click', closeDetailModal);
+        }
+        // Close detail modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !detailModal.classList.contains('hidden')) {
+                closeDetailModal();
+            }
+        });
+        // Close detail modal on outside click
+        if (detailModal) {
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) {
+                    closeDetailModal();
+                }
+            });
+        }
+
+        // --- VIEW MATERIAL FUNCTION ---
+        window.viewMaterial = function(materialId) {
+            // Use the correct route for show method
+            const url = `/logistik/adminlogistik/material/${materialId}`;
+            
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Material data:', data); // Debug log
+                
+                // Populate modal with data
+                document.getElementById('detail-id').textContent = data.id || '-';
+                document.getElementById('detail-nama').textContent = data.nama_material || '-';
+                document.getElementById('detail-satuan').textContent = data.satuan || '-';
+                document.getElementById('detail-stok').textContent = data.stok || '0';
+                document.getElementById('detail-spesifikasi').textContent = data.spesifikasi || 'Tidak ada spesifikasi';
+                
+                // Handle foto
+                const fotoImg = document.getElementById('detail-foto');
+                const noFotoText = document.getElementById('detail-no-foto');
+                
+                if (data.foto) {
+                    fotoImg.src = `/storage/${data.foto}`;
+                    fotoImg.classList.remove('hidden');
+                    noFotoText.classList.add('hidden');
+                } else {
+                    fotoImg.classList.add('hidden');
+                    noFotoText.classList.remove('hidden');
+                }
+                
+                openDetailModal();
+            })
+            .catch(error => {
+                console.error('Error fetching material details:', error);
+                alert('Gagal memuat detail material: ' + error.message);
+            });
+        };
         
         // --- Handle form validation errors ---
         // If there are validation errors, the page reloads. We check for this and re-open the modal.

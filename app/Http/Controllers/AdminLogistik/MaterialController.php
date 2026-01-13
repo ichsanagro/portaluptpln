@@ -25,7 +25,16 @@ class MaterialController extends Controller
         return view('logistik.adminlogistik.material', compact('materials', 'search'));
     }
 
-/**
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        $material = Material::findOrFail($id);
+        return response()->json($material);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -34,14 +43,26 @@ class MaterialController extends Controller
             'nama_material' => 'required|string|max:255',
             'satuan' => 'required|string|max:255',
             'stok' => 'required|integer|min:0',
+            'spesifikasi' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Material::create($request->all());
+        $data = $request->except('foto');
+
+        // Handle foto upload
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('materials', $filename, 'public');
+            $data['foto'] = $path;
+        }
+
+        Material::create($data);
 
         return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil ditambahkan.');
     }
 
-/**
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
@@ -59,10 +80,27 @@ class MaterialController extends Controller
             'nama_material' => 'required|string|max:255',
             'satuan' => 'required|string|max:255',
             'stok' => 'required|integer|min:0',
+            'spesifikasi' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $material = Material::findOrFail($id);
-        $material->update($request->all());
+        $data = $request->except('foto');
+
+        // Handle foto upload
+        if ($request->hasFile('foto')) {
+            // Delete old foto if exists
+            if ($material->foto && \Storage::disk('public')->exists($material->foto)) {
+                \Storage::disk('public')->delete($material->foto);
+            }
+
+            $file = $request->file('foto');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('materials', $filename, 'public');
+            $data['foto'] = $path;
+        }
+
+        $material->update($data);
 
         return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil diperbarui.');
     }
@@ -73,6 +111,12 @@ class MaterialController extends Controller
     public function destroy(string $id)
     {
         $material = Material::findOrFail($id);
+        
+        // Delete foto if exists
+        if ($material->foto && \Storage::disk('public')->exists($material->foto)) {
+            \Storage::disk('public')->delete($material->foto);
+        }
+        
         $material->delete();
 
         return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil dihapus.');
