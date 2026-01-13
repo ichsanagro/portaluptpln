@@ -50,6 +50,15 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->satuan }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->stok }}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <button type="button" class="lihat-btn text-green-600 hover:text-green-900 mr-4"
+                                    data-id="{{ $material->id }}"
+                                    data-nama="{{ $material->nama_material }}"
+                                    data-satuan="{{ $material->satuan }}"
+                                    data-stok="{{ $material->stok }}"
+                                    data-spesifikasi="{{ $material->spesifikasi }}"
+                                    data-foto="{{ $material->foto }}">
+                                    Lihat
+                                </button>
                                 <button type="button" class="pinjam-btn text-blue-600 hover:text-blue-900"
                                     data-id="{{ $material->id }}"
                                     data-nama="{{ $material->nama_material }}"
@@ -107,6 +116,58 @@
         </div>
     </div>
 </div>
+
+{{-- Modal Lihat Detail Material --}}
+<div id="detail-material-modal" class="fixed inset-0 z-20 hidden overflow-y-auto bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out opacity-0">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:block sm:p-0">
+        <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6 opacity-0 scale-95 duration-300 ease-out"
+            role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+            <div class="flex items-center justify-between border-b border-slate-300 pb-4">
+                <h3 class="text-xl font-bold text-slate-800" id="detail-modal-title">Detail Material</h3>
+                <button type="button" id="close-detail-modal-btn" class="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition-colors">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">ID</label>
+                        <p id="detail-id" class="mt-1 text-sm text-slate-900"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Stok</label>
+                        <p id="detail-stok" class="mt-1 text-sm text-slate-900"></p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Nama Material</label>
+                    <p id="detail-nama" class="mt-1 text-sm text-slate-900"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Satuan</label>
+                    <p id="detail-satuan" class="mt-1 text-sm text-slate-900"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Spesifikasi</label>
+                    <p id="detail-spesifikasi" class="mt-1 text-sm text-slate-900 whitespace-pre-line"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Foto Material</label>
+                    <div id="detail-foto-container" class="mt-2">
+                        <img id="detail-foto" src="" alt="Foto Material" class="max-w-full h-auto rounded-lg shadow-md" style="max-height: 400px;">
+                        <p id="detail-no-foto" class="text-sm text-slate-500 italic hidden">Tidak ada foto</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-end">
+                <button type="button" id="close-detail-btn" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -127,6 +188,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const peminjamanForm = document.getElementById('peminjaman-form');
     const hiddenInputsContainer = document.getElementById('hidden-inputs-container');
     const submitPeminjamanBtn = document.getElementById('submit-peminjaman-btn');
+
+    // --- DETAIL MODAL ELEMENTS ---
+    const detailModal = document.getElementById('detail-material-modal');
+    const closeDetailModalBtn = document.getElementById('close-detail-modal-btn');
+    const closeDetailBtn = document.getElementById('close-detail-btn');
 
     const allMaterials = @json($all_materials);
 
@@ -260,27 +326,87 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateTable(materials) {
         tableBody.innerHTML = '';
         if (materials.length > 0) {
-            materials.forEach(material => {
-                tableBody.innerHTML += `
-                    <tr>
-                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">${material.id}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.nama_material}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.satuan}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.stok}</td>
-                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                            <button type="button" class="pinjam-btn text-blue-600 hover:text-blue-900"
-                                data-id="${material.id}" data-nama="${material.nama_material}" data-stok="${material.stok}">
-                                Pinjam
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
+                materials.forEach(material => {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">${material.id}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.nama_material}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.satuan}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.stok}</td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <button type="button" class="lihat-btn text-green-600 hover:text-green-900 mr-4"
+                                    data-id="${material.id}"
+                                    data-nama="${material.nama_material}"
+                                    data-satuan="${material.satuan}"
+                                    data-stok="${material.stok}"
+                                    data-spesifikasi="${material.spesifikasi || ''}"
+                                    data-foto="${material.foto || ''}">
+                                    Lihat
+                                </button>
+                                <button type="button" class="pinjam-btn text-blue-600 hover:text-blue-900"
+                                    data-id="${material.id}" data-nama="${material.nama_material}" data-stok="${material.stok}" data-satuan="${material.satuan}">
+                                    Pinjam
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
         } else {
             tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Tidak ada material yang cocok.</td></tr>`;
         }
     }
 
+
+    // --- DETAIL MODAL FUNCTIONS ---
+    const openDetailModal = () => {
+        if (!detailModal) return;
+        detailModal.classList.remove('hidden');
+        setTimeout(() => {
+            detailModal.classList.remove('opacity-0');
+            detailModal.querySelector('[role="dialog"]').classList.remove('opacity-0', 'scale-95');
+        }, 50);
+    };
+
+    const closeDetailModal = () => {
+        if (!detailModal) return;
+        detailModal.classList.add('opacity-0');
+        detailModal.querySelector('[role="dialog"]').classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            detailModal.classList.add('hidden');
+        }, 300);
+    };
+
+    // --- VIEW MATERIAL FUNCTION ---
+    function viewMaterial(button) {
+        const id = button.dataset.id;
+        const nama = button.dataset.nama;
+        const satuan = button.dataset.satuan;
+        const stok = button.dataset.stok;
+        const spesifikasi = button.dataset.spesifikasi;
+        const foto = button.dataset.foto;
+
+        // Populate modal
+        document.getElementById('detail-id').textContent = id;
+        document.getElementById('detail-nama').textContent = nama;
+        document.getElementById('detail-satuan').textContent = satuan;
+        document.getElementById('detail-stok').textContent = stok;
+        document.getElementById('detail-spesifikasi').textContent = spesifikasi || 'Tidak ada spesifikasi';
+
+        // Handle foto
+        const fotoImg = document.getElementById('detail-foto');
+        const noFotoText = document.getElementById('detail-no-foto');
+
+        if (foto) {
+            fotoImg.src = `/storage/${foto}`;
+            fotoImg.classList.remove('hidden');
+            noFotoText.classList.add('hidden');
+        } else {
+            fotoImg.classList.add('hidden');
+            noFotoText.classList.remove('hidden');
+        }
+
+        openDetailModal();
+    }
 
     // --- EVENT LISTENERS ---
 
@@ -310,13 +436,38 @@ document.addEventListener('DOMContentLoaded', function () {
     closeModalBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);
 
-    // Klik tombol "Pinjam" di tabel
+    // Klik tombol "Lihat" di tabel
     tableBody.addEventListener('click', function (e) {
+        if (e.target.classList.contains('lihat-btn')) {
+            viewMaterial(e.target);
+        }
         if (e.target.classList.contains('pinjam-btn')) {
             const materialId = e.target.dataset.id;
             addToCart(materialId);
         }
     });
+
+    // --- DETAIL MODAL EVENT LISTENERS ---
+    if (closeDetailModalBtn) {
+        closeDetailModalBtn.addEventListener('click', closeDetailModal);
+    }
+    if (closeDetailBtn) {
+        closeDetailBtn.addEventListener('click', closeDetailModal);
+    }
+    // Close detail modal on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !detailModal.classList.contains('hidden')) {
+            closeDetailModal();
+        }
+    });
+    // Close detail modal on outside click
+    if (detailModal) {
+        detailModal.addEventListener('click', (e) => {
+            if (e.target === detailModal) {
+                closeDetailModal();
+            }
+        });
+    }
     
     // Live search di tabel utama
     searchInput.addEventListener('keyup', function () {
