@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminLogistik;
 
 use App\Http\Controllers\Controller;
+use App\Models\Peminjaman;
 use App\Models\Material;
 use Illuminate\Http\Request;
 
@@ -45,6 +46,9 @@ class MaterialController extends Controller
             'stok' => 'required|integer|min:0',
             'spesifikasi' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'jenis_kebutuhan' => 'required|in:peminjaman,permintaan',
+            'lokasi' => 'nullable|string|max:255',
+            'tempat' => 'nullable|string|max:255',
         ]);
 
         $data = $request->except('foto');
@@ -82,6 +86,9 @@ class MaterialController extends Controller
             'stok' => 'required|integer|min:0',
             'spesifikasi' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'jenis_kebutuhan' => 'required|in:peminjaman,permintaan',
+            'lokasi' => 'nullable|string|max:255',
+            'tempat' => 'nullable|string|max:255',
         ]);
 
         $material = Material::findOrFail($id);
@@ -122,20 +129,23 @@ class MaterialController extends Controller
         return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil dihapus.');
     }
 
-    public function permintaan()
+    public function riwayatPesanan()
     {
-        // Fetch all pending borrowing requests
-        $permintaanPeminjaman = \App\Models\Peminjaman::where('status', 'pending')
-            ->with(['user', 'details.material'])
-            ->latest()
-            ->get();
+        // Fetch all peminjaman with related user and details
+        $peminjamans = Peminjaman::with('user', 'details.material')->latest()->get();
 
-        return view('logistik.adminlogistik.permintaan', compact('permintaanPeminjaman'));
+        return view('logistik.adminlogistik.riwayat-pesanan', compact('peminjamans'));
+    }
+
+    public function showPeminjaman(string $id)
+    {
+        $peminjaman = Peminjaman::with('user', 'details.material')->findOrFail($id);
+        return response()->json($peminjaman);
     }
 
     public function approvePeminjaman(string $id)
     {
-        $peminjaman = \App\Models\Peminjaman::findOrFail($id);
+        $peminjaman = Peminjaman::findOrFail($id);
         
         // Only allow approving pending requests
         if ($peminjaman->status !== 'pending') {
@@ -144,12 +154,12 @@ class MaterialController extends Controller
 
         $peminjaman->update(['status' => 'approved']);
 
-        return redirect()->route('logistik.adminlogistik.permintaan')->with('success', 'Permintaan peminjaman berhasil disetujui.');
+        return redirect()->route('logistik.adminlogistik.riwayat-pesanan')->with('success', 'Permintaan peminjaman berhasil disetujui.');
     }
 
     public function rejectPeminjaman(string $id)
     {
-        $peminjaman = \App\Models\Peminjaman::findOrFail($id);
+        $peminjaman = Peminjaman::findOrFail($id);
 
         // Only allow rejecting pending requests
         if ($peminjaman->status !== 'pending') {
@@ -158,7 +168,7 @@ class MaterialController extends Controller
         
         // Revert material stock for rejected requests
         foreach ($peminjaman->details as $detail) {
-            $material = \App\Models\Material::find($detail->material_id);
+            $material = Material::find($detail->material_id);
             if ($material) {
                 $material->increment('stok', $detail->jumlah);
             }
@@ -166,6 +176,6 @@ class MaterialController extends Controller
 
         $peminjaman->update(['status' => 'rejected']);
 
-        return redirect()->route('logistik.adminlogistik.permintaan')->with('success', 'Permintaan peminjaman berhasil ditolak dan stok dikembalikan.');
+        return redirect()->route('logistik.adminlogistik.riwayat-pesanan')->with('success', 'Permintaan peminjaman berhasil ditolak dan stok dikembalikan.');
     }
 }

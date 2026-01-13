@@ -15,5 +15,8 @@ class Material extends Model
         'stok',
         'spesifikasi',
         'foto',
+        'jenis_kebutuhan',
+        'lokasi',
+        'tempat',
     ];
 }

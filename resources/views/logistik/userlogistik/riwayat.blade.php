@@ -43,7 +43,12 @@
                                 <td class="px-3 py-4 text-sm text-slate-500">
                                     <ul class="list-disc pl-5 space-y-1">
                                         @foreach ($peminjaman->details as $detail)
-                                            <li>{{ $detail->material->nama_material }} ({{ $detail->jumlah }} {{ $detail->material->satuan }})</li>
+                                            <li>
+                                                {{ $detail->material->nama_material }} ({{ $detail->jumlah }} {{ $detail->material->satuan }})
+                                                @if($detail->catatan)
+                                                    <span class="text-xs italic text-gray-500"> - Catatan: {{ $detail->catatan }}</span>
+                                                @endif
+                                            </li>
                                         @endforeach
                                     </ul>
                                 </td>

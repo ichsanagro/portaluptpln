@@ -32,12 +32,12 @@
                 </svg>
                 Kelola Material
             </a>
-            <a href="{{ route('logistik.adminlogistik.permintaan') }}"
-               class="{{ request()->routeIs('logistik.adminlogistik.permintaan') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+            <a href="{{ route('logistik.adminlogistik.riwayat-pesanan') }}"
+               class="{{ request()->routeIs('logistik.adminlogistik.riwayat-pesanan') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
                 <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-.664m2.553-4.575A48.47 48.47 0 007.5 4.5c-2.18 0-4.205.533-5.976 1.442" />
                 </svg>
-                Permintaan
+                Riwayat Pesanan
             </a>
         @elseif(request()->routeIs('logistik.userlogistik.*'))
             <a href="{{ route('logistik.userlogistik.dashboard') }}"
@@ -47,13 +47,34 @@
                 </svg>
                 Dashboard
             </a>
-            <a href="{{ route('logistik.userlogistik.peminjaman') }}"
-               class="{{ request()->routeIs('logistik.userlogistik.peminjaman') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
-                <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h.008v.008H8.25zm0-8.25h.008v.008H8.25zM12 18h.008v.008H12zm-3.75 4.5V16.5a3.75 3.75 0 013.75-3.75h1.5A1.125 1.125 0 0116.5 13.5v1.5a3.75 3.75 0 01-3.75 3.75H12m-3.75-4.5H12m0-3h.008v.008H12z" />
-                </svg>
-                Peminjaman
-            </a>
+            <div class="relative">
+                <button id="peminjaman-toggle"
+                   class="{{ request()->routeIs('logistik.userlogistik.peminjaman') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium w-full text-left">
+                    <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h.008v.008H8.25zm0-8.25h.008v.008H8.25zM12 18h.008v.008H12zm-3.75 4.5V16.5a3.75 3.75 0 013.75-3.75h1.5A1.125 1.125 0 0116.5 13.5v1.5a3.75 3.75 0 01-3.75 3.75H12m-3.75-4.5H12m0-3h.008v.008H12z" />
+                    </svg>
+                    Pemesanan
+                    <svg class="ml-auto h-4 w-4 transition-transform duration-200" id="peminjaman-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+                <div id="peminjaman-submenu" class="hidden ml-6 mt-1 space-y-1">
+                    <a href="{{ route('logistik.userlogistik.permintaan') }}"
+                       class="{{ request()->routeIs('logistik.userlogistik.permintaan') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+                        <svg class="mr-3 h-5 w-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-.664m2.553-4.575A48.47 48.47 0 007.5 4.5c-2.18 0-4.205.533-5.976 1.442" />
+                        </svg>
+                        Permintaan
+                    </a>
+                    <a href="{{ route('logistik.userlogistik.peminjaman') }}"
+                       class="{{ request()->routeIs('logistik.userlogistik.peminjaman') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+                        <svg class="mr-3 h-5 w-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h.008v.008H8.25zm0-8.25h.008v.008H8.25zM12 18h.008v.008H12zm-3.75 4.5V16.5a3.75 3.75 0 013.75-3.75h1.5A1.125 1.125 0 0116.5 13.5v1.5a3.75 3.75 0 01-3.75 3.75H12m-3.75-4.5H12m0-3h.008v.008H12z" />
+                        </svg>
+                        Peminjaman
+                    </a>
+                </div>
+            </div>
             <a href="{{ route('logistik.userlogistik.pengembalian') }}"
                class="{{ request()->routeIs('logistik.userlogistik.pengembalian') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
                 <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -81,3 +102,12 @@
         </a>
     </div>
 </div>
+
+<script>
+    document.getElementById('peminjaman-toggle').addEventListener('click', function() {
+        const submenu = document.getElementById('peminjaman-submenu');
+        const arrow = document.getElementById('peminjaman-arrow');
+        submenu.classList.toggle('hidden');
+        arrow.classList.toggle('rotate-180');
+    });
+</script>

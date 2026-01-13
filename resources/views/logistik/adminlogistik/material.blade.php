@@ -82,6 +82,9 @@
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Nama Material</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Satuan</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Stok</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Lokasi</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Tempat</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Jenis Kebutuhan</th>
                             <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                 <span class="sr-only">Aksi</span>
                             </th>
@@ -94,6 +97,9 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->nama_material }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->satuan }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->stok }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->lokasi ?? '-' }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->tempat ?? '-' }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ ucfirst($material->jenis_kebutuhan) }}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <button type="button" onclick="viewMaterial({{ $material->id }})" class="text-green-600 hover:text-green-900">Lihat</button>
                                 <a href="{{ route('logistik.adminlogistik.material.edit', $material->id) }}" class="ml-4 text-blue-600 hover:text-blue-900">Edit</a>
@@ -170,6 +176,30 @@
                         </div>
                     </div>
                     <div>
+                        <x-input-label for="lokasi" value="Lokasi" />
+                        <div class="mt-2">
+                            <x-text-input
+                                id="lokasi"
+                                name="lokasi"
+                                type="text"
+                                placeholder="Masukkan lokasi material (opsional)"
+                                value="{{ old('lokasi') }}"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <x-input-label for="tempat" value="Tempat" />
+                        <div class="mt-2">
+                            <x-text-input
+                                id="tempat"
+                                name="tempat"
+                                type="text"
+                                placeholder="Masukkan tempat penyimpanan material (opsional)"
+                                value="{{ old('tempat') }}"
+                            />
+                        </div>
+                    </div>
+                    <div>
                         <x-input-label for="spesifikasi" value="Spesifikasi" />
                         <div class="mt-2">
                             <textarea
@@ -179,6 +209,20 @@
                                 class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                                 placeholder="Masukkan spesifikasi material (opsional)"
                             >{{ old('spesifikasi') }}</textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <x-input-label for="jenis_kebutuhan" value="Jenis Kebutuhan" />
+                        <div class="mt-2">
+                            <select
+                                id="jenis_kebutuhan"
+                                name="jenis_kebutuhan"
+                                required
+                                class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                            >
+                                <option value="peminjaman">Peminjaman</option>
+                                <option value="permintaan">Permintaan</option>
+                            </select>
                         </div>
                     </div>
                     <div>
@@ -239,8 +283,20 @@
                     <p id="detail-satuan" class="mt-1 text-sm text-slate-900"></p>
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-slate-700">Lokasi</label>
+                    <p id="detail-lokasi" class="mt-1 text-sm text-slate-900"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Tempat</label>
+                    <p id="detail-tempat" class="mt-1 text-sm text-slate-900"></p>
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-slate-700">Spesifikasi</label>
                     <p id="detail-spesifikasi" class="mt-1 text-sm text-slate-900 whitespace-pre-line"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Jenis Kebutuhan</label>
+                    <p id="detail-jenis_kebutuhan" class="mt-1 text-sm text-slate-900"></p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Foto Material</label>
@@ -390,7 +446,10 @@
                 document.getElementById('detail-nama').textContent = data.nama_material || '-';
                 document.getElementById('detail-satuan').textContent = data.satuan || '-';
                 document.getElementById('detail-stok').textContent = data.stok || '0';
+                document.getElementById('detail-lokasi').textContent = data.lokasi || '-';
+                document.getElementById('detail-tempat').textContent = data.tempat || '-';
                 document.getElementById('detail-spesifikasi').textContent = data.spesifikasi || 'Tidak ada spesifikasi';
+                document.getElementById('detail-jenis_kebutuhan').textContent = data.jenis_kebutuhan ? data.jenis_kebutuhan.charAt(0).toUpperCase() + data.jenis_kebutuhan.slice(1) : '-';
                 
                 // Handle foto
                 const fotoImg = document.getElementById('detail-foto');
@@ -452,8 +511,12 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.nama_material}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.satuan}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.stok}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.lokasi || '-'}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.tempat || '-'}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.jenis_kebutuhan ? material.jenis_kebutuhan.charAt(0).toUpperCase() + material.jenis_kebutuhan.slice(1) : '-'}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="${editUrl}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <button type="button" onclick="viewMaterial(${material.id})" class="text-green-600 hover:text-green-900">Lihat</button>
+                                <a href="${editUrl}" class="ml-4 text-blue-600 hover:text-blue-900">Edit</a>
                                 <form action="${deleteUrl}" method="POST" class="inline">
                                     <input type="hidden" name="_token" value="${csrfToken}">
                                     <input type="hidden" name="_method" value="DELETE">
@@ -467,7 +530,7 @@
             } else {
                 const row = `
                     <tr>
-                        <td colspan="5" class="whitespace-nowrap px-3 py-4 text-sm text-slate-500 text-center">Tidak ada material yang ditemukan.</td>
+                        <td colspan="8" class="whitespace-nowrap px-3 py-4 text-sm text-slate-500 text-center">Tidak ada material yang ditemukan.</td>
                     </tr>
                 `;
                 tableBody.innerHTML = row;

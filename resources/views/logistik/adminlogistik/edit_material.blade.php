@@ -52,6 +52,30 @@
                 </div>
             </div>
             <div>
+                <x-input-label for="lokasi" value="Lokasi" />
+                <div class="mt-2">
+                    <x-text-input
+                        id="lokasi"
+                        name="lokasi"
+                        type="text"
+                        value="{{ old('lokasi', $material->lokasi) }}"
+                        placeholder="Masukkan lokasi material (opsional)"
+                    />
+                </div>
+            </div>
+            <div>
+                <x-input-label for="tempat" value="Tempat" />
+                <div class="mt-2">
+                    <x-text-input
+                        id="tempat"
+                        name="tempat"
+                        type="text"
+                        value="{{ old('tempat', $material->tempat) }}"
+                        placeholder="Masukkan tempat penyimpanan material (opsional)"
+                    />
+                </div>
+            </div>
+            <div>
                 <x-input-label for="spesifikasi" value="Spesifikasi" />
                 <div class="mt-2">
                     <textarea
@@ -61,6 +85,20 @@
                         class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                         placeholder="Masukkan spesifikasi material (opsional)"
                     >{{ old('spesifikasi', $material->spesifikasi) }}</textarea>
+                </div>
+            </div>
+            <div>
+                <x-input-label for="jenis_kebutuhan" value="Jenis Kebutuhan" />
+                <div class="mt-2">
+                    <select
+                        id="jenis_kebutuhan"
+                        name="jenis_kebutuhan"
+                        required
+                        class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                    >
+                        <option value="peminjaman" {{ old('jenis_kebutuhan', $material->jenis_kebutuhan) == 'peminjaman' ? 'selected' : '' }}>Peminjaman</option>
+                        <option value="permintaan" {{ old('jenis_kebutuhan', $material->jenis_kebutuhan) == 'permintaan' ? 'selected' : '' }}>Permintaan</option>
+                    </select>
                 </div>
             </div>
             <div>

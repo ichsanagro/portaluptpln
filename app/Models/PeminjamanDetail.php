@@ -13,7 +13,8 @@ class PeminjamanDetail extends Model
         'peminjaman_id',
         'material_id',
         'jumlah',
-        'returned_jumlah', // Add new fillable column
+        'returned_jumlah',
+        'catatan',
     ];
 
     public function peminjaman()

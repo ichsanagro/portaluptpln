@@ -55,9 +55,10 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
             'material' => 'id'
         ])->except(['create']);
 
-        Route::get('/adminlogistik/permintaan', [MaterialController::class, 'permintaan'])->name('adminlogistik.permintaan');
-        Route::post('/adminlogistik/permintaan/{id}/approve', [MaterialController::class, 'approvePeminjaman'])->name('adminlogistik.permintaan.approve');
-        Route::post('/adminlogistik/permintaan/{id}/reject', [MaterialController::class, 'rejectPeminjaman'])->name('adminlogistik.permintaan.reject');
+        Route::get('/adminlogistik/riwayat-pesanan', [MaterialController::class, 'riwayatPesanan'])->name('adminlogistik.riwayat-pesanan');
+        Route::get('/adminlogistik/riwayat-pesanan/{id}', [MaterialController::class, 'showPeminjaman'])->name('adminlogistik.riwayat-pesanan.show');
+        Route::post('/adminlogistik/riwayat-pesanan/{id}/approve', [MaterialController::class, 'approvePeminjaman'])->name('adminlogistik.riwayat-pesanan.approve');
+        Route::post('/adminlogistik/riwayat-pesanan/{id}/reject', [MaterialController::class, 'rejectPeminjaman'])->name('adminlogistik.riwayat-pesanan.reject');
     });
 
     // User Logistik Routes
@@ -65,6 +66,8 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
         Route::get('/dashboard', [UserLogistikController::class, 'index'])->name('dashboard');
         Route::get('/peminjaman', [UserLogistikController::class, 'peminjaman'])->name('peminjaman');
         Route::post('/peminjaman', [UserLogistikController::class, 'storePeminjaman'])->name('peminjaman.store');
+        Route::get('/permintaan', [UserLogistikController::class, 'permintaan'])->name('permintaan');
+        Route::post('/permintaan', [UserLogistikController::class, 'storePermintaan'])->name('permintaan.store');
         Route::get('/pengembalian', [UserLogistikController::class, 'pengembalian'])->name('pengembalian');
         Route::post('/pengembalian', [UserLogistikController::class, 'storePengembalian'])->name('pengembalian.store'); // New route for storing returns
         Route::get('/riwayat', [UserLogistikController::class, 'riwayatPeminjaman'])->name('riwayat'); // New route for borrowing history

@@ -20,8 +20,54 @@ class UserLogistikController extends Controller
 
     public function peminjaman()
     {
-        $all_materials = Material::all();
+        $all_materials = Material::where('jenis_kebutuhan', 'peminjaman')->get();
         return view('logistik.userlogistik.peminjaman', compact('all_materials'));
+    }
+
+    public function permintaan()
+    {
+        $materials_permintaan = Material::where('jenis_kebutuhan', 'permintaan')->get();
+        return view('logistik.userlogistik.permintaan', compact('materials_permintaan'));
+    }
+
+    public function storePermintaan(Request $request)
+    {
+        $request->validate([
+            'materials' => 'required|array|min:1',
+            'materials.*.id' => 'required|exists:materials,id',
+            'materials.*.jumlah' => 'required|integer|min:1',
+            'materials.*.catatan' => 'nullable|string',
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'user_id' => auth()->id(),
+            'status' => 'pending',
+            'jenis_peminjaman' => 'permintaan', // Set the type to 'permintaan'
+        ]);
+
+        $materialList = [];
+        foreach ($request->materials as $materialData) {
+            $material = Material::find($materialData['id']);
+            if ($material->stok < $materialData['jumlah']) {
+                $peminjaman->delete();
+                return redirect()->back()->withErrors(['stok' => 'Stok material ' . $material->nama_material . ' tidak mencukupi.'])->withInput();
+            }
+
+            PeminjamanDetail::create([
+                'peminjaman_id' => $peminjaman->id,
+                'material_id' => $materialData['id'],
+                'jumlah' => $materialData['jumlah'],
+                'catatan' => $materialData['catatan'] ?? null,
+            ]);
+
+            $material->decrement('stok', $materialData['jumlah']);
+            $materialList[] = "- {$material->nama_material}: {$materialData['jumlah']} {$material->satuan}";
+        }
+
+        // You might want to create a different notification method for permintaan
+        $this->sendPeminjamanNotification($peminjaman, $materialList);
+
+        return redirect()->route('logistik.userlogistik.permintaan')->with('success', 'Permintaan material berhasil diajukan.');
     }
 
     public function pengembalian()
@@ -89,6 +135,7 @@ class UserLogistikController extends Controller
             'materials' => 'required|array|min:1',
             'materials.*.id' => 'required|exists:materials,id',
             'materials.*.jumlah' => 'required|integer|min:1',
+            'materials.*.catatan' => 'nullable|string',
         ]);
 
         $peminjaman = Peminjaman::create([
@@ -109,6 +156,7 @@ class UserLogistikController extends Controller
                 'peminjaman_id' => $peminjaman->id,
                 'material_id' => $materialData['id'],
                 'jumlah' => $materialData['jumlah'],
+                'catatan' => $materialData['catatan'] ?? null,
             ]);
 
             // Decrement stock
