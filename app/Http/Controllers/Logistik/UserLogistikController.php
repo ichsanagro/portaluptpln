@@ -74,50 +74,77 @@ class UserLogistikController extends Controller
     {
         $userId = auth()->id();
 
-        $itemsToReturn = PeminjamanDetail::whereHas('peminjaman', function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                      ->where('status', 'approved'); // Only approved borrowings can be returned
+        $peminjamanToReturn = Peminjaman::where('user_id', $userId)
+            ->where('status', 'approved')
+            // Ensure this Peminjaman contains materials that are of type 'peminjaman'
+            ->whereHas('details.material', function ($query) {
+                $query->where('jenis_kebutuhan', 'peminjaman');
             })
-            ->whereColumn('jumlah', '>', 'returned_jumlah') // Only items not fully returned
-            ->with(['peminjaman', 'material'])
+            // And also ensure there are details that have not been fully returned
+            ->whereHas('details', function ($query) {
+                $query->whereColumn('jumlah', '>', 'returned_jumlah');
+            })
+            ->with(['details' => function ($query) {
+                // Load only the details that are still returnable
+                $query->whereColumn('jumlah', '>', 'returned_jumlah')
+                      ->with('material');
+            }])
+            ->latest()
             ->get();
             
-        return view('logistik.userlogistik.pengembalian', compact('itemsToReturn'));
+        return view('logistik.userlogistik.pengembalian', compact('peminjamanToReturn'));
     }
 
     public function storePengembalian(Request $request)
     {
         $request->validate([
-            'returns' => 'required|array|min:1',
+            'peminjaman_id' => 'required|exists:peminjamans,id',
+            'returns' => 'sometimes|array', // 'sometimes' allows empty submissions
             'returns.*.peminjaman_detail_id' => 'required|exists:peminjaman_details,id',
-            'returns.*.quantity' => 'required|integer|min:1',
+            'returns.*.quantity' => 'required|integer|min:0', // min:0 to allow submitting no change
         ]);
 
-        foreach ($request->returns as $returnData) {
-            $peminjamanDetail = PeminjamanDetail::findOrFail($returnData['peminjaman_detail_id']);
-            $material = Material::findOrFail($peminjamanDetail->material_id);
+        $peminjamanId = $request->input('peminjaman_id');
+        $peminjaman = Peminjaman::findOrFail($peminjamanId);
 
-            $quantityToReturn = $returnData['quantity'];
-            $remainingToReturn = $peminjamanDetail->jumlah - $peminjamanDetail->returned_jumlah;
+        // Ensure the peminjaman belongs to the user and is approved
+        if ($peminjaman->user_id !== auth()->id() || $peminjaman->status !== 'approved') {
+            return redirect()->back()->withErrors('Transaksi peminjaman tidak valid.');
+        }
 
-            if ($quantityToReturn > $remainingToReturn) {
-                return redirect()->back()->withErrors('Jumlah pengembalian untuk ' . $material->nama_material . ' melebihi jumlah yang belum dikembalikan.')->withInput();
-            }
+        $totalReturned = 0;
+        if ($request->has('returns')) {
+            foreach ($request->returns as $detailId => $returnData) {
+                // Ensure the quantity is a valid number and > 0
+                if (!is_numeric($returnData['quantity']) || $returnData['quantity'] <= 0) {
+                    continue;
+                }
+                
+                $quantityToReturn = (int)$returnData['quantity'];
+                $totalReturned += $quantityToReturn;
 
-            // Update returned_jumlah in PeminjamanDetail
-            $peminjamanDetail->increment('returned_jumlah', $quantityToReturn);
-            // Increment material stock
-            $material->increment('stok', $quantityToReturn);
-            
-            // Check if this PeminjamanDetail is fully returned
-            if ($peminjamanDetail->jumlah === $peminjamanDetail->returned_jumlah) {
-                // Optionally update a status for PeminjamanDetail if needed, e.g., 'completed'
-                // For simplicity, we just rely on 'jumlah' vs 'returned_jumlah' for now.
+                $peminjamanDetail = PeminjamanDetail::where('id', $detailId)
+                                                    ->where('peminjaman_id', $peminjamanId)
+                                                    ->firstOrFail();
+
+                $material = Material::findOrFail($peminjamanDetail->material_id);
+                $remainingToReturn = $peminjamanDetail->jumlah - $peminjamanDetail->returned_jumlah;
+
+                if ($quantityToReturn > $remainingToReturn) {
+                    return redirect()->back()->withErrors(['returns.'.$detailId.'.quantity' => 'Jumlah pengembalian untuk ' . $material->nama_material . ' melebihi jumlah yang dipinjam.'])->withInput();
+                }
+
+                $peminjamanDetail->increment('returned_jumlah', $quantityToReturn);
+                $material->increment('stok', $quantityToReturn);
             }
         }
 
+        if ($totalReturned === 0) {
+            return redirect()->back()->withErrors('Tidak ada jumlah material yang diisi untuk dikembalikan.');
+        }
+
         // After updating all details, check if the parent Peminjaman is fully returned
-        $peminjaman = $peminjamanDetail->peminjaman; // Get the parent peminjaman from the last detail
+        $peminjaman->load('details');
         $allDetailsReturned = $peminjaman->details->every(function ($detail) {
             return $detail->jumlah === $detail->returned_jumlah;
         });
@@ -126,7 +153,7 @@ class UserLogistikController extends Controller
             $peminjaman->update(['status' => 'completed']);
         }
 
-        return redirect()->route('logistik.userlogistik.pengembalian')->with('success', 'Material berhasil dikembalikan.');
+        return redirect()->route('logistik.userlogistik.pengembalian')->with('success', 'Material dari Peminjaman ID #' . $peminjamanId . ' berhasil dikembalikan.');
     }
 
     public function storePeminjaman(Request $request)

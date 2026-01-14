@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Peminjaman')
+@section('title', 'Riwayat')
 
 @section('content')
 <x-card>
     <div class="border-b border-slate-200 p-6">
-        <h3 class="text-xl font-semibold text-slate-800">Riwayat Peminjaman Material</h3>
+        <h3 class="text-xl font-semibold text-slate-800">Riwayat</h3>
         <p class="mt-1 text-sm text-slate-600">Daftar semua material yang pernah Anda pinjam.</p>
     </div>
 
@@ -46,7 +46,7 @@
                                             <li>
                                                 {{ $detail->material->nama_material }} ({{ $detail->jumlah }} {{ $detail->material->satuan }})
                                                 @if($detail->catatan)
-                                                    <span class="text-xs italic text-gray-500"> - Catatan: {{ $detail->catatan }}</span>
+                                                    <span class="text-xs italic text-gray-500"> - Catatan: {{ \Illuminate\Support\Str::limit($detail->catatan, 30) }}</span>
                                                 @endif
                                             </li>
                                         @endforeach

@@ -129,12 +129,12 @@ class MaterialController extends Controller
         return redirect()->route('logistik.adminlogistik.material.index')->with('success', 'Material berhasil dihapus.');
     }
 
-    public function riwayatPesanan()
+    public function riwayat()
     {
         // Fetch all peminjaman with related user and details
         $peminjamans = Peminjaman::with('user', 'details.material')->latest()->get();
 
-        return view('logistik.adminlogistik.riwayat-pesanan', compact('peminjamans'));
+        return view('logistik.adminlogistik.riwayat', compact('peminjamans'));
     }
 
     public function showPeminjaman(string $id)
@@ -154,7 +154,7 @@ class MaterialController extends Controller
 
         $peminjaman->update(['status' => 'approved']);
 
-        return redirect()->route('logistik.adminlogistik.riwayat-pesanan')->with('success', 'Permintaan peminjaman berhasil disetujui.');
+        return redirect()->route('logistik.adminlogistik.riwayat')->with('success', 'Permintaan peminjaman berhasil disetujui.');
     }
 
     public function rejectPeminjaman(string $id)
@@ -176,6 +176,6 @@ class MaterialController extends Controller
 
         $peminjaman->update(['status' => 'rejected']);
 
-        return redirect()->route('logistik.adminlogistik.riwayat-pesanan')->with('success', 'Permintaan peminjaman berhasil ditolak dan stok dikembalikan.');
+        return redirect()->route('logistik.adminlogistik.riwayat')->with('success', 'Permintaan peminjaman berhasil ditolak dan stok dikembalikan.');
     }
 }

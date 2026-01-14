@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Pesanan')
+@section('title', 'Riwayat')
 
 @section('content')
 <x-card>
@@ -8,7 +8,7 @@
     <div class="border-b border-slate-200 p-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="w-full md:w-auto">
-                <h3 class="text-xl font-semibold text-slate-800">Daftar Riwayat Pesanan</h3>
+                <h3 class="text-xl font-semibold text-slate-800">Daftar Riwayat</h3>
                 <p class="mt-1 text-sm text-slate-600">Kelola pesanan yang diajukan oleh user.</p>
             </div>
             <div class="w-full sm:w-auto">
@@ -57,7 +57,7 @@
                                                                         <li>
                                                                             {{ $detail->material->nama_material }} ({{ $detail->jumlah }} {{ $detail->material->satuan }})
                                                                             @if($detail->catatan)
-                                                                                <br><span class="text-xs italic text-gray-500">Catatan: {{ $detail->catatan }}</span>
+                                                                                <br><span class="text-xs italic text-gray-500">Catatan: {{ \Illuminate\Support\Str::limit($detail->catatan, 30) }}</span>
                                                                             @endif
                                                                         </li>
                                                                     @endforeach
@@ -76,11 +76,11 @@
                             <td class="relative space-x-2 whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <button type="button" onclick="viewPeminjaman({{ $peminjaman->id }})" class="text-blue-600 hover:text-blue-900">Lihat</button>
                                 @if ($peminjaman->status === 'pending')
-                                    <form action="{{ route('logistik.adminlogistik.riwayat-pesanan.approve', $peminjaman->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('logistik.adminlogistik.riwayat.approve', $peminjaman->id) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="rounded-md bg-green-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-green-500" onclick="return confirm('Anda yakin ingin menyetujui permintaan ini?')">Setuju</button>
                                     </form>
-                                    <form action="{{ route('logistik.adminlogistik.riwayat-pesanan.reject', $peminjaman->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('logistik.adminlogistik.riwayat.reject', $peminjaman->id) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="rounded-md bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500" onclick="return confirm('Anda yakin ingin menolak permintaan ini? Stok material akan dikembalikan.')">Tolak</button>
                                     </form>
@@ -168,7 +168,7 @@
         }
 
         window.viewPeminjaman = function(peminjamanId) {
-            const url = `/logistik/adminlogistik/riwayat-pesanan/${peminjamanId}`;
+            const url = `/logistik/adminlogistik/riwayat/${peminjamanId}`;
             
             fetch(url, {
                 headers: {

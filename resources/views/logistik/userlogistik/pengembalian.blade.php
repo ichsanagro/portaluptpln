@@ -44,56 +44,72 @@
         </div>
     @endif
 
-    <form action="{{ route('logistik.userlogistik.pengembalian.store') }}" method="POST">
-        @csrf
-        <div class="flow-root">
-            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    @if ($itemsToReturn->isEmpty())
-                        <div class="p-6 text-center text-gray-500 italic">
-                            <p>Tidak ada material yang perlu dikembalikan saat ini.</p>
-                            <p class="text-sm">Pastikan Anda memiliki peminjaman yang disetujui.</p>
-                        </div>
-                    @else
-                        <table class="min-w-full divide-y divide-slate-200">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Material</th>
-                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Dipinjam (Jumlah)</th>
-                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Sudah Kembali</th>
-                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Jumlah Kembali</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white">
-                                @foreach ($itemsToReturn as $item)
-                                    <tr>
-                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">
-                                            {{ $item->material->nama_material }}
-                                            <span class="text-gray-500 text-xs block">ID Peminjaman: {{ $item->peminjaman->id }}</span>
-                                        </td>
-                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $item->jumlah }} {{ $item->material->satuan }}</td>
-                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $item->returned_jumlah }} {{ $item->material->satuan }}</td>
-                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
-                                            <input type="number" name="returns[{{ $item->id }}][quantity]"
-                                                   min="0"
-                                                   max="{{ $item->jumlah - $item->returned_jumlah }}"
-                                                   value="0"
-                                                   class="block w-24 rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm" />
-                                            <input type="hidden" name="returns[{{ $item->id }}][peminjaman_detail_id]" value="{{ $item->id }}" />
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div class="mt-6 flex items-center justify-end gap-x-6">
-                            <x-primary-button type="submit">
-                                Proses Pengembalian
-                            </x-primary-button>
-                        </div>
-                    @endif
-                </div>
-            </div>
+    @if ($peminjamanToReturn->isEmpty())
+        <div class="p-6 text-center text-gray-500 italic">
+            <p>Tidak ada material yang perlu dikembalikan saat ini.</p>
+            <p class="text-sm">Pastikan Anda memiliki peminjaman yang disetujui.</p>
         </div>
-    </form>
+    @else
+        @foreach ($peminjamanToReturn as $peminjaman)
+            <form action="{{ route('logistik.userlogistik.pengembalian.store') }}" method="POST" class="mb-8 border border-slate-200 rounded-lg shadow-sm">
+                @csrf
+                <input type="hidden" name="peminjaman_id" value="{{ $peminjaman->id }}">
+                <div class="bg-slate-50 px-4 py-3 sm:px-6">
+                    <h4 class="text-lg font-semibold text-slate-800">
+                        Peminjaman #{{ $peminjaman->id }}
+                        <span class="font-normal text-slate-500">({{ \Carbon\Carbon::parse($peminjaman->created_at)->format('d M Y H:i') }})</span>
+                    </h4>
+                </div>
+                <div class="flow-root">
+                    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                            <table class="min-w-full divide-y divide-slate-200">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Material</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Dipinjam (Jumlah)</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Sudah Kembali</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Jumlah Kembali</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white">
+                                    @foreach ($peminjaman->details as $item)
+                                        <tr>
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">
+                                                {{ $item->material->nama_material }}
+                                                @if ($item->material->jenis_kebutuhan === 'permintaan')
+                                                    <span class="block text-xs italic text-orange-600">(Permintaan - Tidak perlu dikembalikan)</span>
+                                                @endif
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $item->jumlah }} {{ $item->material->satuan }}</td>
+                                            @if ($item->material->jenis_kebutuhan === 'peminjaman')
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $item->returned_jumlah }} {{ $item->material->satuan }}</td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                                                    <input type="number" name="returns[{{ $item->id }}][quantity]"
+                                                           min="0"
+                                                           max="{{ $item->jumlah - $item->returned_jumlah }}"
+                                                           value="0"
+                                                           class="block w-24 rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm" />
+                                                    <input type="hidden" name="returns[{{ $item->id }}][peminjaman_detail_id]" value="{{ $item->id }}" />
+                                                </td>
+                                            @else
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">-</td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">-</td>
+                                            @endif
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex items-center justify-end gap-x-6 px-6 pb-4">
+                    <x-primary-button type="submit">
+                        Proses Pengembalian
+                    </x-primary-button>
+                </div>
+            </form>
+        @endforeach
+    @endif
 </x-card>
 @endsection

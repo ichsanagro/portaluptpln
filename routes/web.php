@@ -55,10 +55,10 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
             'material' => 'id'
         ])->except(['create']);
 
-        Route::get('/adminlogistik/riwayat-pesanan', [MaterialController::class, 'riwayatPesanan'])->name('adminlogistik.riwayat-pesanan');
-        Route::get('/adminlogistik/riwayat-pesanan/{id}', [MaterialController::class, 'showPeminjaman'])->name('adminlogistik.riwayat-pesanan.show');
-        Route::post('/adminlogistik/riwayat-pesanan/{id}/approve', [MaterialController::class, 'approvePeminjaman'])->name('adminlogistik.riwayat-pesanan.approve');
-        Route::post('/adminlogistik/riwayat-pesanan/{id}/reject', [MaterialController::class, 'rejectPeminjaman'])->name('adminlogistik.riwayat-pesanan.reject');
+        Route::get('/adminlogistik/riwayat', [MaterialController::class, 'riwayat'])->name('adminlogistik.riwayat');
+        Route::get('/adminlogistik/riwayat/{id}', [MaterialController::class, 'showPeminjaman'])->name('adminlogistik.riwayat.show');
+        Route::post('/adminlogistik/riwayat/{id}/approve', [MaterialController::class, 'approvePeminjaman'])->name('adminlogistik.riwayat.approve');
+        Route::post('/adminlogistik/riwayat/{id}/reject', [MaterialController::class, 'rejectPeminjaman'])->name('adminlogistik.riwayat.reject');
     });
 
     // User Logistik Routes
