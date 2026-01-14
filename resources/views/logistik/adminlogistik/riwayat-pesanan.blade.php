@@ -35,7 +35,7 @@
                             <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Tanggal</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">User</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Material</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Jenis</th>
+
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Status</th>
                             <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                 <span class="sr-only">Aksi</span>
@@ -62,7 +62,7 @@
                                                                         </li>
                                                                     @endforeach
                                                                 </ul>
-                                                            </td>                            <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ ucfirst($peminjaman->jenis_peminjaman) }}</td>
+                                                            </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{
                                     $peminjaman->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -74,7 +74,7 @@
                                 </span>
                             </td>
                             <td class="relative space-x-2 whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <button type="button" onclick="viewPeminjaman({{ $peminjaman->id }})" class="text-green-600 hover:text-green-900">Lihat</button>
+                                <button type="button" onclick="viewPeminjaman({{ $peminjaman->id }})" class="text-blue-600 hover:text-blue-900">Lihat</button>
                                 @if ($peminjaman->status === 'pending')
                                     <form action="{{ route('logistik.adminlogistik.riwayat-pesanan.approve', $peminjaman->id) }}" method="POST" class="inline">
                                         @csrf
@@ -91,7 +91,7 @@
                         </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="p-6 text-center text-gray-500 italic">Tidak ada pesanan.</td>
+                                <td colspan="5" class="p-6 text-center text-gray-500 italic">Tidak ada pesanan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -185,9 +185,14 @@
             .then(data => {
                 let materialsHtml = '<ul class="list-disc pl-5 space-y-2">';
                 data.details.forEach(detail => {
+                    // Determine the type and color based on the material's 'jenis_kebutuhan'
+                    const isPeminjaman = detail.material.jenis_kebutuhan === 'peminjaman';
+                    const typeText = isPeminjaman ? 'Peminjaman' : 'Permintaan';
+                    const typeColorClass = isPeminjaman ? 'text-blue-600' : 'text-blue-600';
+
                     materialsHtml += `
                         <li>
-                            <span class="font-semibold">${detail.material.nama_material}</span> (${detail.jumlah} ${detail.material.satuan})
+                            <span class="font-semibold">${detail.material.nama_material}</span> (${detail.jumlah} ${detail.material.satuan}) - <span class="font-bold ${typeColorClass}">${typeText}</span>
                             <div class="text-xs pl-4">
                                 ${detail.catatan ? `<p class="italic text-gray-600">Catatan: ${detail.catatan}</p>` : ''}
                                 ${detail.material.lokasi ? `<p>Lokasi: ${detail.material.lokasi}</p>` : ''}
@@ -208,10 +213,7 @@
                             <label class="block text-sm font-medium text-slate-700">User</label>
                             <p class="mt-1 text-sm text-slate-900">${data.user.name}</p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Jenis Pesanan</label>
-                            <p class="mt-1 text-sm text-slate-900">${data.jenis_peminjaman ? data.jenis_peminjaman.charAt(0).toUpperCase() + data.jenis_peminjaman.slice(1) : '-'}</p>
-                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-slate-700">Status</label>
                             <p class="mt-1 text-sm text-slate-900">${data.status.charAt(0).toUpperCase() + data.status.slice(1)}</p>
