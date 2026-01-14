@@ -70,6 +70,8 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
         Route::post('/permintaan', [UserLogistikController::class, 'storePermintaan'])->name('permintaan.store');
         Route::get('/pengembalian', [UserLogistikController::class, 'pengembalian'])->name('pengembalian');
         Route::post('/pengembalian', [UserLogistikController::class, 'storePengembalian'])->name('pengembalian.store'); // New route for storing returns
+        Route::get('/kerusakan', [UserLogistikController::class, 'kerusakan'])->name('kerusakan');
+        Route::post('/kerusakan', [UserLogistikController::class, 'storeKerusakan'])->name('kerusakan.store');
         Route::get('/riwayat', [UserLogistikController::class, 'riwayatPeminjaman'])->name('riwayat'); // New route for borrowing history
     });
 });

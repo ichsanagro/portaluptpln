@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Logistik;
 
 use App\Http\Controllers\Controller;
+use App\Models\KerusakanReport;
 use App\Models\Material;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanDetail;
@@ -254,6 +255,101 @@ class UserLogistikController extends Controller
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    public function kerusakan()
+    {
+        $userId = auth()->id();
+
+        $peminjamanToReport = Peminjaman::where('user_id', $userId)
+            ->whereIn('status', ['approved', 'completed']) // Include completed to see all borrowed items
+            // Ensure this Peminjaman has materials that were of type 'peminjaman'
+            ->whereHas('details', function ($query) {
+                $query->whereColumn('jumlah', '>', 'returned_jumlah')
+                    ->whereHas('material', function ($subQuery) {
+                        $subQuery->where('jenis_kebutuhan', 'peminjaman');
+                    });
+            })
+            ->with(['details' => function ($query) {
+                // Load only the details that are still reportable (not fully returned and are peminjaman type)
+                $query->whereColumn('jumlah', '>', 'returned_jumlah')
+                    ->whereHas('material', function ($subQuery) {
+                        $subQuery->where('jenis_kebutuhan', 'peminjaman');
+                    })
+                    ->with('material');
+            }])
+            ->latest()
+            ->get();
+            
+        return view('logistik.userlogistik.kerusakan', compact('peminjamanToReport'));
+    }
+
+    public function storeKerusakan(Request $request)
+    {
+        $request->validate([
+            'peminjaman_id' => 'required|exists:peminjamans,id',
+            'reports' => 'sometimes|array',
+            'reports.*.file' => 'nullable|file|mimes:pdf|max:2048',
+            'reports.*.catatan' => 'nullable|string',
+            'reports.*.jumlah_rusak' => 'required_with:reports.*.file|integer|min:1',
+        ]);
+
+        $peminjamanId = $request->input('peminjaman_id');
+        $peminjaman = Peminjaman::where('id', $peminjamanId)
+                                ->where('user_id', auth()->id())
+                                ->firstOrFail();
+
+        $reportSubmitted = false;
+        if ($request->has('reports')) {
+            foreach ($request->reports as $detailId => $reportData) {
+                // Only process if either file or jumlah_rusak is provided, or a catatan is given
+                if ($request->hasFile("reports.{$detailId}.file") || (isset($reportData['jumlah_rusak']) && $reportData['jumlah_rusak'] > 0) || !empty($reportData['catatan'])) {
+                    
+                    $peminjamanDetail = PeminjamanDetail::where('id', $detailId)
+                                                        ->where('peminjaman_id', $peminjaman->id)
+                                                        ->first();
+
+                    if (!$peminjamanDetail) {
+                        continue; // Skip if the detail ID is not valid for this peminjaman
+                    }
+
+                    $jumlahRusak = (int)($reportData['jumlah_rusak'] ?? 0);
+
+                    // Manual validation for max quantity
+                    if ($jumlahRusak > ($peminjamanDetail->jumlah - $peminjamanDetail->returned_jumlah)) {
+                        return redirect()->back()->withErrors([
+                            "reports.{$detailId}.jumlah_rusak" => "Jumlah rusak untuk " . $peminjamanDetail->material->nama_material . " melebihi sisa material yang belum kembali."
+                        ])->withInput();
+                    }
+                    
+                    $filePath = null;
+                    if ($request->hasFile("reports.{$detailId}.file")) {
+                        $file = $request->file("reports.{$detailId}.file");
+                        $filePath = $file->store('kerusakan_reports', 'public');
+                    } else if (empty($reportData['catatan'])) {
+                         // If no file and no catatan, and jumlah_rusak is there, we still need a file or catatan.
+                        return redirect()->back()->withErrors([
+                            "reports.{$detailId}.file" => "Laporan kerusakan (PDF) atau Catatan harus diisi jika Jumlah Rusak dilaporkan."
+                        ])->withInput();
+                    }
+
+
+                    KerusakanReport::create([
+                        'peminjaman_detail_id' => $detailId,
+                        'file_path' => $filePath, // Can be null if no file uploaded
+                        'catatan' => $reportData['catatan'] ?? null,
+                        'jumlah_rusak' => $jumlahRusak,
+                    ]);
+                    $reportSubmitted = true;
+                }
+            }
+        }
+
+        if (!$reportSubmitted) {
+            return redirect()->back()->withErrors(['reports' => 'Anda harus mengisi setidaknya satu laporan kerusakan.']);
+        }
+
+        return redirect()->route('logistik.userlogistik.kerusakan')->with('success', 'Laporan kerusakan berhasil dikirim.');
     }
 
     public function riwayatPeminjaman()
