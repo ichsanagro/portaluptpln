@@ -76,13 +76,12 @@ class UserLogistikController extends Controller
 
         $peminjamanToReturn = Peminjaman::where('user_id', $userId)
             ->where('status', 'approved')
-            // Ensure this Peminjaman contains materials that are of type 'peminjaman'
-            ->whereHas('details.material', function ($query) {
-                $query->where('jenis_kebutuhan', 'peminjaman');
-            })
-            // And also ensure there are details that have not been fully returned
+            // Ensure this Peminjaman has un-returned materials that are of type 'peminjaman'
             ->whereHas('details', function ($query) {
-                $query->whereColumn('jumlah', '>', 'returned_jumlah');
+                $query->whereColumn('jumlah', '>', 'returned_jumlah')
+                    ->whereHas('material', function ($subQuery) {
+                        $subQuery->where('jenis_kebutuhan', 'peminjaman');
+                    });
             })
             ->with(['details' => function ($query) {
                 // Load only the details that are still returnable
@@ -91,7 +90,7 @@ class UserLogistikController extends Controller
             }])
             ->latest()
             ->get();
-            
+
         return view('logistik.userlogistik.pengembalian', compact('peminjamanToReturn'));
     }
 
