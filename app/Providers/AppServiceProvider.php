@@ -21,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('components.hse-stats', HseStatsComposer::class);
+        View::composer(
+            ['hse.dashboard', 'hse.admin_dashboard', 'components.hse-stats'],
+            HseStatsComposer::class
+        );
     }
 }

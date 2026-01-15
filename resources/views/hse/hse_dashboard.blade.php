@@ -5,24 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HSE Dashboard</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 5px 5px rgba(251, 191, 36, 0);
+            }
+        }
+
+        .animate-pulse-warning {
+            animation: pulse-warning 2s infinite;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col font-sans antialiased">
-    <div class="flex-grow p-4 sm:p-6 lg:p-8">
-        <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-xl p-6 sm:p-8 lg:p-10">
-            <h1 class="text-3xl sm:text-4xl font-extrabold mb-8 text-center text-blue-800">HSE Dashboard</h1>
+<body class="font-sans antialiased">
 
-            {{-- Include the HSE Stats Component --}}
-            @include('components.hse-stats')
+    <div class="max-w-7xl mx-auto h-full flex flex-col gap-3 p-3">
+        
+        <h1 class="text-4xl font-bold text-center text-[#28a8e0] flex-shrink-0">HSE Dashboard</h1>
 
-            {{-- Admin Panel is removed from user view --}}
-
+        {{-- HSE Stats Component --}}
+        <div class="bg-white p-3 rounded-lg shadow-lg flex-shrink-0">
+             @include('components.hse-stats')
         </div>
+
+        {{-- Real-Time Monitoring Component --}}
+        <div class="bg-white p-3 rounded-lg shadow-lg flex-shrink-0">
+            @include('components.real-time-monitoring')
+        </div>
+
+        {{-- Display Content Component --}}
+        <div class="bg-white p-2 rounded-lg shadow-lg flex-grow min-h-0 flex items-center justify-center">
+            @if(($displayMode ?? 'video') === 'image' && $imageUrl)
+                <img src="{{ $imageUrl }}" alt="Dashboard Display Image" class="w-full h-full object-contain rounded-lg">
+            @else
+                <x-video-player type="url" src="{{ $videoUrl ?? 'https://youtu.be/HNLm9a5brfQ?si=aozePA9WCMtFF-TV' }}" />
+            @endif
+        </div>
+
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-
-        });
-    </script>
 </body>
 </html>

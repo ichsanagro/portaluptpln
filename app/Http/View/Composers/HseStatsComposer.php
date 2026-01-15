@@ -53,7 +53,8 @@ class HseStatsComposer
             $view->with([
                 'safeWorkingDays' => $displayedSafeWorkingDays,
                 'accidentCount' => $stats->accident_count,
-                'workingDaysThisYear' => $workingDaysThisYear
+                'workingDaysThisYear' => $workingDaysThisYear,
+                'videoUrl' => $stats->video_url,
             ]);
 
         } catch (\Exception $e) {
@@ -61,7 +62,8 @@ class HseStatsComposer
             $view->with([
                 'safeWorkingDays' => 0,
                 'accidentCount' => 0,
-                'workingDaysThisYear' => 0
+                'workingDaysThisYear' => 0,
+                'videoUrl' => null,
             ]);
         }
     }

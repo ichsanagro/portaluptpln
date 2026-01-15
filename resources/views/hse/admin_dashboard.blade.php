@@ -46,6 +46,49 @@
                         </div>
                     </div>
 
+                    <!-- Display Settings Management -->
+                    <form action="{{ route('hse.admin_display_update') }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded-md shadow-sm border border-gray-100 space-y-4">
+                        @csrf
+                        <h3 class="text-lg font-medium text-gray-700 border-b pb-2">Pengaturan Tampilan Dashboard</h3>
+                        
+                        <!-- Display Mode -->
+                        <div class="flex items-center space-x-4">
+                            <label class="text-base font-medium text-gray-700">Tampilkan:</label>
+                            <div class="flex items-center">
+                                <input type="radio" id="displayModeVideo" name="display_mode" value="video" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" {{ ($displayMode ?? 'video') === 'video' ? 'checked' : '' }}>
+                                <label for="displayModeVideo" class="ml-2 block text-sm font-medium text-gray-900">Video</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="displayModeImage" name="display_mode" value="image" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" {{ ($displayMode ?? '') === 'image' ? 'checked' : '' }}>
+                                <label for="displayModeImage" class="ml-2 block text-sm font-medium text-gray-900">Gambar</label>
+                            </div>
+                        </div>
+
+                        <!-- Video URL Input -->
+                        <div id="videoInputContainer">
+                            <label for="videoUrlInput" class="block text-sm font-medium text-gray-700">URL Video (YouTube):</label>
+                            <input type="url" id="videoUrlInput" name="video_url" value="{{ $videoUrl ?? '' }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+
+                        <!-- Image Upload Input -->
+                        <div id="imageInputContainer" class="hidden">
+                            <label for="dashboardImageInput" class="block text-sm font-medium text-gray-700">Upload Gambar:</label>
+                            <input type="file" id="dashboardImageInput" name="dashboard_image" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            @if($imageUrl)
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500">Gambar saat ini:</p>
+                                    <img src="{{ $imageUrl }}" alt="Dashboard Image" class="mt-1 h-24 w-auto rounded-md border">
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Update Tampilan</button>
+                        </div>
+                    </form>
+
+
+
                     <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6 border-t pt-4">
                         <button id="saveChanges" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded-md transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">Simpan Perubahan</button>
                         <button id="resetData" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-md transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">Reset Data</button>
@@ -143,6 +186,32 @@
                 saveChangesButton.addEventListener('click', saveData);
                 resetDataButton.addEventListener('click', resetData);
             }
+
+            // Display Mode Toggle Logic
+            const displayModeVideo = document.getElementById('displayModeVideo');
+            const displayModeImage = document.getElementById('displayModeImage');
+            const videoInputContainer = document.getElementById('videoInputContainer');
+            const imageInputContainer = document.getElementById('imageInputContainer');
+            const dashboardImageInput = document.getElementById('dashboardImageInput');
+            const videoUrlInput = document.getElementById('videoUrlInput');
+
+            function toggleDisplayInputs() {
+                if (displayModeVideo.checked) {
+                    videoInputContainer.classList.remove('hidden');
+                    imageInputContainer.classList.add('hidden');
+                    dashboardImageInput.value = ''; // Clear file input when switching away
+                } else if (displayModeImage.checked) {
+                    videoInputContainer.classList.add('hidden');
+                    imageInputContainer.classList.remove('hidden');
+                    videoUrlInput.value = ''; // Clear video URL when switching away
+                }
+            }
+
+            // Initial state
+            toggleDisplayInputs();
+
+            displayModeVideo.addEventListener('change', toggleDisplayInputs);
+            displayModeImage.addEventListener('change', toggleDisplayInputs);
         });
     </script>
 </body>

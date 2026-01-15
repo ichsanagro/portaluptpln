@@ -1,19 +1,19 @@
-<div class="grid grid-cols-4 gap-1">
-    <div class="bg-gradient-to-br from-blue-700 to-blue-800 text-white p-1 rounded-md shadow-sm flex flex-col justify-center text-center">
-        <div class="text-xs font-semibold">Hari</div>
-        <div id="realTimeClock" class="text-xs font-bold"></div>
+<div class="grid grid-cols-4 gap-4">
+    <div class="bg-gradient-to-br from-[#28a8e0] to-blue-500 text-white p-2 rounded-lg shadow-md flex flex-col justify-center text-center">
+        <div class="font-semibold">Hari & Waktu</div>
+        <div id="realTimeClock" class="text-sm font-bold mt-1"></div>
     </div>
-    <div class="bg-white p-1 rounded-md shadow-sm border border-gray-200 text-center">
-        <div class="text-xs font-semibold text-gray-700">Hari Kerja</div>
-        <div id="workingDaysThisYear" class="text-sm font-bold text-gray-800">{{ $workingDaysThisYear ?? 0 }}</div>
+    <div class="bg-white p-2 rounded-lg shadow-md text-center">
+        <div class="font-semibold text-gray-600">Total Hari Kerja</div>
+        <div id="workingDaysThisYear" class="text-2xl font-bold text-gray-800 mt-1">{{ $workingDaysThisYear ?? 0 }}</div>
     </div>
-    <div class="bg-white p-1 rounded-md shadow-sm border border-gray-200 text-center">
-        <div class="text-xs font-semibold text-gray-700">Hari Aman</div>
-        <div id="safeWorkingDays" class="text-sm font-bold text-green-600">{{ $safeWorkingDays ?? 0 }}</div>
+    <div class="bg-white p-2 rounded-lg shadow-md text-center">
+        <div class="font-semibold text-gray-600">Hari Kerja Aman</div>
+        <div id="safeWorkingDays" class="text-2xl font-bold text-green-600 mt-1">{{ $safeWorkingDays ?? 0 }}</div>
     </div>
-    <div class="bg-white p-1 rounded-md shadow-sm border border-gray-200 text-center">
-        <div class="text-xs font-semibold text-gray-700">Kecelakaan</div>
-        <div id="accidentCount" class="text-sm font-bold text-red-600">{{ $accidentCount ?? 0 }}</div>
+    <div class="bg-white p-2 rounded-lg shadow-md text-center border {{ ($accidentCount ?? 0) > 0 ? 'border-red-500' : 'border-gray-200' }}">
+        <div class="font-semibold text-gray-600">Jumlah Kecelakaan</div>
+        <div id="accidentCount" class="text-2xl font-bold text-red-600 mt-1">{{ $accidentCount ?? 0 }}</div>
     </div>
 </div>
 
@@ -29,14 +29,14 @@
                 function updateClock() {
                     const now = new Date();
                     const optionsDay = { weekday: 'long' }; // e.g., "Senin"
-                    const optionsDate = { day: '2-digit', month: '2-digit', year: 'numeric' }; // DD-MM-YYYY
+                    const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' }; // DD-MM-YYYY
                     const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit' }; // HH:MM:SS
                     
                     const dayString = now.toLocaleDateString('id-ID', optionsDay);
                     const dateString = now.toLocaleDateString('id-ID', optionsDate);
-                    const timeString = now.toLocaleTimeString('id-ID', optionsTime);
+                    const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                     
-                    realTimeClock.innerHTML = `${dayString}, ${dateString}<br>${timeString}`; // Day, DD-MM-YYYY on top, HH:MM:SS below
+                    realTimeClock.innerHTML = `${dayString}, ${dateString}<br>${now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}`;
                 }
                 setInterval(updateClock, 1000);
                 updateClock();

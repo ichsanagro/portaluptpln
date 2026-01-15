@@ -80,6 +80,7 @@ Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
     // Admin HSE Dashboard
     Route::middleware('role:admin hse')->group(function () {
         Route::get('/admin/dashboard', [AdminHseController::class, 'dashboard'])->name('admin_dashboard');
+        Route::post('/admin/display/update', [AdminHseController::class, 'updateDisplaySettings'])->name('admin_display_update');
         Route::post('/admin/stats/update', [AdminHseController::class, 'updateStats'])->name('admin_stats_update');
         Route::post('/admin/stats/reset', [AdminHseController::class, 'resetStats'])->name('admin_stats_reset');
     });

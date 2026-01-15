@@ -3,7 +3,7 @@
 @section('title', '')
 
 @push('header-items')
-    @include('components.hse-stats')
+    @include('components.hse-stats-small')
 @endpush
 
 @section('content')
