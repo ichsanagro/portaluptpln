@@ -30,8 +30,18 @@
                     {{-- User Profile Dropdown --}}
                     <div class="relative">
                         <button type="button" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
-                            <span class="text-sm font-semibold">{{ session('user.name') ?? 'Guest' }}</span>
-                            <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(session('user.name') ?? 'Guest') }}&color=7F9CF5&background=EBF4FF" alt="Avatar">
+                            <span class="text-sm font-semibold">
+                                @if(Auth::check())
+                                    @if(Auth::user()->hasRole('admin logistik'))
+                                        Admin
+                                    @else
+                                        {{ Auth::user()->name }}
+                                    @endif
+                                @else
+                                    Guest
+                                @endif
+                            </span>
+                            <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::check() ? (Auth::user()->hasRole('admin logistik') ? 'Admin' : Auth::user()->name) : 'Guest') }}&color=7F9CF5&background=EBF4FF" alt="Avatar">
                         </button>
                         {{-- Dropdown menu can be added here --}}
                     </div>

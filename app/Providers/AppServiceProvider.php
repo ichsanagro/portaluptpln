@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer(
-            ['hse.dashboard', 'hse.admin_dashboard', 'components.hse-stats'],
+            ['hse.dashboard', 'hse.admin_dashboard', 'components.hse-stats', 'logistik.adminlogistik.admin_dashboard', 'logistik.userlogistik.dashboard'],
             HseStatsComposer::class
         );
     }

@@ -30,7 +30,7 @@
 </head>
 <body class="font-sans antialiased">
 
-    <div class="max-w-7xl mx-auto h-full flex flex-col gap-3 p-3">
+    <div class="w-screen h-screen flex flex-col">
         
         <h1 class="text-4xl font-bold text-center text-[#28a8e0] flex-shrink-0">HSE Dashboard</h1>
 

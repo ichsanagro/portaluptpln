@@ -19,8 +19,8 @@
 
 <script>
     // Ensure the script runs only once, even if included multiple times.
-    if (typeof hseStatsSmallClockScriptLoaded === 'undefined') {
-        const hseStatsSmallClockScriptLoaded = true;
+    if (!window.hseStatsSmallClockScriptLoaded) {
+        window.hseStatsSmallClockScriptLoaded = true;
 
         document.addEventListener('DOMContentLoaded', () => {
             const realTimeClockSmall = document.getElementById('realTimeClockSmall');
@@ -34,7 +34,7 @@
                     const dayString = now.toLocaleDateString('id-ID', optionsDay);
                     const dateString = now.toLocaleDateString('id-ID', optionsDate);
                     
-                    realTimeClockSmall.innerHTML = `${dayString}, ${dateString}<br>${now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})}`;
+                    realTimeClockSmall.innerHTML = `${dayString}, ${dateString}<br>${now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}`;
                 }
                 setInterval(updateClockSmall, 1000);
                 updateClockSmall();

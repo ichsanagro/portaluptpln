@@ -49,6 +49,7 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
             return view('logistik.adminlogistik.admin_dashboard');
         })->name('adminlogistik.dashboard');
 
+        Route::get('/adminlogistik/material/export', [MaterialController::class, 'export'])->name('adminlogistik.material.export');
         Route::resource('/adminlogistik/material', MaterialController::class, [
             'as' => 'adminlogistik'
         ])->parameters([

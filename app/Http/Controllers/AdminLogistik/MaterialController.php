@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\Material;
 use Illuminate\Http\Request;
+use App\Exports\MaterialsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MaterialController extends Controller
 {
@@ -24,6 +26,11 @@ class MaterialController extends Controller
         }
 
         return view('logistik.adminlogistik.material', compact('materials', 'search'));
+    }
+
+    public function export()
+    {
+        return Excel::download(new MaterialsExport, 'materials.xlsx');
     }
 
     /**
