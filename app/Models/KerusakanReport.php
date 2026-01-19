@@ -12,4 +12,9 @@ class KerusakanReport extends Model
         'catatan',
         'jumlah_rusak',
     ];
+
+    public function peminjamanDetail()
+    {
+        return $this->belongsTo(PeminjamanDetail::class);
+    }
 }

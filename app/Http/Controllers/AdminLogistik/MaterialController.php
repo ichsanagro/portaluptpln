@@ -5,6 +5,8 @@ namespace App\Http\Controllers\AdminLogistik;
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\Material;
+use App\Models\KerusakanReport;
+use App\Models\PeminjamanDetail; // Import PeminjamanDetail
 use Illuminate\Http\Request;
 use App\Exports\MaterialsExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -26,6 +28,38 @@ class MaterialController extends Controller
         }
 
         return view('logistik.adminlogistik.material', compact('materials', 'search'));
+    }
+
+    public function dashboard()
+    {
+        $totalMaterial = Material::count();
+        $permintaanPending = Peminjaman::where('status', 'pending')->count();
+        $permintaanDisetujui = Peminjaman::where('status', 'approved')->count();
+        $stokHampirHabis = Material::where('stok', '<', 10)->count(); // Assuming 'low stock' is < 10
+
+        $recentActivities = Peminjaman::with('user', 'details.material')->latest()->take(5)->get();
+
+        // Data for most frequently requested/borrowed materials
+        $mostFrequentMaterials = PeminjamanDetail::selectRaw('material_id, SUM(jumlah) as total_quantity')
+            ->groupBy('material_id')
+            ->orderByDesc('total_quantity')
+            ->with('material') // Eager load material details
+            ->take(7) // Limit to top 7 materials
+            ->get();
+
+        $chartLabels = $mostFrequentMaterials->map(fn($item) => $item->material->nama_material)->toArray();
+        $chartData = $mostFrequentMaterials->map(fn($item) => $item->total_quantity)->toArray();
+
+        return view('logistik.adminlogistik.admin_dashboard', compact(
+            'totalMaterial',
+            'permintaanPending',
+            'permintaanDisetujui',
+            'stokHampirHabis',
+            'recentActivities',
+            'mostFrequentMaterials',
+            'chartLabels',
+            'chartData'
+        ));
     }
 
     public function export()
@@ -184,5 +218,11 @@ class MaterialController extends Controller
         $peminjaman->update(['status' => 'rejected']);
 
         return redirect()->route('logistik.adminlogistik.riwayat')->with('success', 'Permintaan peminjaman berhasil ditolak dan stok dikembalikan.');
+    }
+
+    public function ujiKerusakan()
+    {
+        $kerusakanReports = KerusakanReport::with('peminjamanDetail.peminjaman.user', 'peminjamanDetail.material')->latest()->get();
+        return view('logistik.adminlogistik.uji_kerusakan', compact('kerusakanReports'));
     }
 }

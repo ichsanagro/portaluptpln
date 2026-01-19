@@ -45,9 +45,7 @@ Route::post('/login', function (Illuminate\Http\Request $request) {
 
 Route::prefix('logistik')->name('logistik.')->group(function () {
     Route::middleware(['auth', 'role:admin logistik'])->group(function () {
-        Route::get('/adminlogistik/dashboard', function() {
-            return view('logistik.adminlogistik.admin_dashboard');
-        })->name('adminlogistik.dashboard');
+        Route::get('/adminlogistik/dashboard', [MaterialController::class, 'dashboard'])->name('adminlogistik.dashboard');
 
         Route::get('/adminlogistik/material/export', [MaterialController::class, 'export'])->name('adminlogistik.material.export');
         Route::resource('/adminlogistik/material', MaterialController::class, [
@@ -60,6 +58,7 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
         Route::get('/adminlogistik/riwayat/{id}', [MaterialController::class, 'showPeminjaman'])->name('adminlogistik.riwayat.show');
         Route::post('/adminlogistik/riwayat/{id}/approve', [MaterialController::class, 'approvePeminjaman'])->name('adminlogistik.riwayat.approve');
         Route::post('/adminlogistik/riwayat/{id}/reject', [MaterialController::class, 'rejectPeminjaman'])->name('adminlogistik.riwayat.reject');
+        Route::get('/adminlogistik/uji-kerusakan', [MaterialController::class, 'ujiKerusakan'])->name('adminlogistik.uji_kerusakan');
     });
 
     // User Logistik Routes

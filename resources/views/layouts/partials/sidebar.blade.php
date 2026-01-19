@@ -39,6 +39,13 @@
                 </svg>
                 Riwayat
             </a>
+            <a href="{{ route('logistik.adminlogistik.uji_kerusakan') }}"
+               class="{{ request()->routeIs('logistik.adminlogistik.uji_kerusakan') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+                <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                Uji Kerusakan
+            </a>
         @elseif(request()->routeIs('logistik.userlogistik.*'))
             <a href="{{ route('logistik.userlogistik.dashboard') }}"
                class="{{ request()->routeIs('logistik.userlogistik.dashboard') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
@@ -49,7 +56,7 @@
             </a>
             <div class="relative">
                 <button id="peminjaman-toggle"
-                   class="{{ request()->routeIs('logistik.userlogistik.peminjaman') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium w-full text-left">
+                   class="{{ request()->routeIs(['logistik.userlogistik.peminjaman', 'logistik.userlogistik.permintaan']) ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium w-full text-left">
                     <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h.008v.008H8.25zm0-8.25h.008v.008H8.25zM12 18h.008v.008H12zm-3.75 4.5V16.5a3.75 3.75 0 013.75-3.75h1.5A1.125 1.125 0 0116.5 13.5v1.5a3.75 3.75 0 01-3.75 3.75H12m-3.75-4.5H12m0-3h.008v.008H12z" />
                     </svg>
@@ -111,10 +118,22 @@
 </div>
 
 <script>
-    document.getElementById('peminjaman-toggle').addEventListener('click', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('peminjaman-toggle');
         const submenu = document.getElementById('peminjaman-submenu');
         const arrow = document.getElementById('peminjaman-arrow');
-        submenu.classList.toggle('hidden');
-        arrow.classList.toggle('rotate-180');
+        const isPemesananActive = {{ request()->routeIs(['logistik.userlogistik.peminjaman', 'logistik.userlogistik.permintaan']) ? 'true' : 'false' }};
+
+        if (isPemesananActive) {
+            submenu.classList.remove('hidden');
+            arrow.classList.add('rotate-180');
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                submenu.classList.toggle('hidden');
+                arrow.classList.toggle('rotate-180');
+            });
+        }
     });
 </script>

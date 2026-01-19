@@ -16,7 +16,29 @@ class UserLogistikController extends Controller
 {
     public function index()
     {
-        return view('logistik.userlogistik.dashboard');
+        $userId = auth()->id();
+        $myPendingRequests = Peminjaman::where('user_id', $userId)->where('status', 'pending')->count();
+        $myApprovedRequests = Peminjaman::where('user_id', $userId)->where('status', 'approved')->count();
+
+        $borrowedQuery = PeminjamanDetail::whereHas('peminjaman', function ($query) use ($userId) {
+            $query->where('user_id', $userId)->where('status', 'approved');
+        });
+        $totalBorrowed = (clone $borrowedQuery)->sum('jumlah');
+        $totalReturned = (clone $borrowedQuery)->sum('returned_jumlah');
+        $myBorrowedItems = $totalBorrowed - $totalReturned;
+
+        $recentActivities = Peminjaman::where('user_id', $userId)
+            ->with('details.material')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('logistik.userlogistik.dashboard', compact(
+            'myPendingRequests',
+            'myApprovedRequests',
+            'myBorrowedItems',
+            'recentActivities'
+        ));
     }
 
     public function peminjaman()

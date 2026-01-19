@@ -1,6 +1,6 @@
 <div>
-    <h2 class="text-xl font-bold text-center mb-3 text-[#28a8e0]">Monitoring Real-Time</h2>
-    <div class="grid grid-cols-4 gap-3">
+    <h2 class="text-lg font-bold text-center mb-2 text-[#28a8e0]">Monitoring Real-Time</h2>
+    <div class="grid grid-cols-4 gap-2">
 
         @php
         $cards = [
@@ -52,7 +52,7 @@
                 }
 
             @endphp
-            <div class="{{ $bgColor }} p-3 rounded-lg shadow-md flex flex-col justify-between border {{ $borderColor }} {{ $animationClass }}">
+            <div class="{{ $bgColor }} p-2 rounded-lg shadow-md flex flex-col justify-between border {{ $borderColor }} {{ $animationClass }}">
                 <div>
                     <div class="flex justify-between items-start">
                         <div class="flex items-center space-x-2">
@@ -63,7 +63,7 @@
                         </div>
                          <span class="text-xs font-bold {{$badgeBg}} {{$badgeText}} px-2 py-1 rounded-full">{{$card['status']}}</span>
                     </div>
-                    <p class="text-3xl font-bold text-gray-800 text-center mt-2">
+                    <p class="text-2xl font-bold text-gray-800 text-center mt-2">
                         {{ $card['value'] }}<span class="text-xl font-semibold text-gray-500">{{ $card['unit'] }}</span>
                     </p>
                 </div>

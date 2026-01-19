@@ -30,22 +30,22 @@
 </head>
 <body class="font-sans antialiased">
 
-    <div class="w-screen h-screen flex flex-col">
+    <div class="w-screen h-screen flex flex-col p-2 gap-2">
         
-        <h1 class="text-4xl font-bold text-center text-[#28a8e0] flex-shrink-0">HSE Dashboard</h1>
+        <h1 class="text-2xl font-bold text-center text-[#28a8e0] flex-shrink-0">HSE Dashboard</h1>
 
         {{-- HSE Stats Component --}}
-        <div class="bg-white p-3 rounded-lg shadow-lg flex-shrink-0">
+        <div class="bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
              @include('components.hse-stats')
         </div>
 
         {{-- Real-Time Monitoring Component --}}
-        <div class="bg-white p-3 rounded-lg shadow-lg flex-shrink-0">
+        <div class="bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
             @include('components.real-time-monitoring')
         </div>
 
         {{-- Display Content Component --}}
-        <div class="bg-white p-2 rounded-lg shadow-lg flex-grow min-h-0 flex items-center justify-center">
+        <div class="bg-white p-1 rounded-lg shadow-lg flex-grow min-h-0 flex items-center justify-center">
             @if(($displayMode ?? 'video') === 'image' && $imageUrl)
                 <img src="{{ $imageUrl }}" alt="Dashboard Display Image" class="w-full h-full object-contain rounded-lg">
             @else
