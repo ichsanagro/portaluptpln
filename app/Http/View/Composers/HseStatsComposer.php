@@ -2,6 +2,7 @@
 
 namespace App\Http\View\Composers;
 
+use App\Models\AccidentLog;
 use App\Models\HseStat;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -49,12 +50,15 @@ class HseStatsComposer
                 }
                 $displayedSafeWorkingDays = $tempSafeWorkingDays;
             }
+
+            $accidentLogs = AccidentLog::orderBy('accident_date', 'desc')->get();
             
             $view->with([
                 'safeWorkingDays' => $displayedSafeWorkingDays,
                 'accidentCount' => $stats->accident_count,
                 'workingDaysThisYear' => $workingDaysThisYear,
                 'videoUrl' => $stats->video_url,
+                'accidentLogs' => $accidentLogs,
             ]);
 
         } catch (\Exception $e) {
@@ -64,6 +68,7 @@ class HseStatsComposer
                 'accidentCount' => 0,
                 'workingDaysThisYear' => 0,
                 'videoUrl' => null,
+                'accidentLogs' => [],
             ]);
         }
     }

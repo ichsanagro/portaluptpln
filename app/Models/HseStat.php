@@ -11,6 +11,9 @@ class HseStat extends Model
         'accident_count',
         'start_date',
         'last_safe_working_day_update',
+        'video_url',
+        'image_path',
+        'display_mode',
     ];
 
     protected $casts = [

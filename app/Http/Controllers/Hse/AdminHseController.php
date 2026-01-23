@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Hse;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccidentLog;
 use App\Models\HseStat;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -106,15 +107,32 @@ class AdminHseController extends Controller
             'safe_working_days' => 'required|integer|min:0',
             'accident_count' => 'required|integer|min:0',
             'start_date' => 'nullable|date',
+            'last_accident_date' => 'nullable|date',
+            'accident_description' => 'nullable|string',
         ]);
 
         $stats = HseStat::firstOrFail();
 
-        // If accident count increases, reset safe days
-        if ($validated['accident_count'] > $stats->accident_count) {
+        // If a new accident date is present, it means a new accident was added.
+        if (!empty($validated['last_accident_date'])) {
             $validated['safe_working_days'] = 0;
             $stats->last_safe_working_day_update = Carbon::today();
+            
+            // Create a new accident log
+            AccidentLog::create([
+                'accident_date' => $validated['last_accident_date'],
+                'description' => $validated['accident_description'],
+            ]);
         }
+
+        // If admin sets accident count to 0, clear the logs
+        if ((int)$validated['accident_count'] === 0 && $stats->accident_count > 0) {
+            AccidentLog::truncate();
+        }
+        
+        // We no longer store accident details directly on the HseStat model
+        unset($validated['last_accident_date']);
+        unset($validated['accident_description']);
 
         $stats->update($validated);
 
@@ -131,6 +149,60 @@ class AdminHseController extends Controller
             'last_safe_working_day_update' => Carbon::today(),
         ]);
 
+        // Also clear the accident logs
+        AccidentLog::truncate();
+
         return response()->json(['success' => true, 'message' => 'Statistik berhasil direset.']);
+    }
+
+    /**
+     * Display a listing of the accident logs.
+     */
+    public function indexAccidents()
+    {
+        $accidentLogs = AccidentLog::orderBy('accident_date', 'desc')->paginate(15);
+        return view('hse.admin_accidents', ['accidentLogs' => $accidentLogs]);
+    }
+
+    /**
+     * Show the form for editing the specified accident log.
+     */
+    public function editAccident($id)
+    {
+        $accidentLog = AccidentLog::findOrFail($id);
+        return view('hse.edit_accident', ['accidentLog' => $accidentLog]);
+    }
+
+    /**
+     * Update the specified accident log in storage.
+     */
+    public function updateAccident(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'accident_date' => 'required|date',
+            'description' => 'required|string',
+        ]);
+
+        $accidentLog = AccidentLog::findOrFail($id);
+        $accidentLog->update($validated);
+
+        return redirect()->route('hse.admin_accidents.index')->with('success', 'Data kecelakaan berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified accident log from storage.
+     */
+    public function destroyAccident($id)
+    {
+        $accidentLog = AccidentLog::findOrFail($id);
+        $accidentLog->delete();
+
+        // Decrement the counter in the main stats table
+        $stats = HseStat::first();
+        if ($stats && $stats->accident_count > 0) {
+            $stats->decrement('accident_count');
+        }
+
+        return redirect()->route('hse.admin_accidents.index')->with('success', 'Data kecelakaan berhasil dihapus.');
     }
 }

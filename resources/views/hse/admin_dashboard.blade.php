@@ -90,8 +90,45 @@
 
 
                     <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6 border-t pt-4">
+                        <a href="{{ route('hse.admin_accidents.index') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 text-center">Kelola Kecelakaan</a>
                         <button id="saveChanges" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded-md transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">Simpan Perubahan</button>
                         <button id="resetData" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-md transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">Reset Data</button>
+                        <a href="/ " class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-md transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 text-center">Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Modal Tambah Detail Kecelakaan --}}
+            <div id="accident-details-modal" class="fixed inset-0 z-20 hidden overflow-y-auto bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out opacity-0">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                    <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 opacity-0 scale-95 duration-300 ease-out"
+                        role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                        <div class="flex items-center justify-between border-b border-slate-300 pb-4">
+                            <h3 class="text-xl font-bold text-slate-800" id="modal-title">Tambah Detail Kecelakaan</h3>
+                            <button type="button" id="close-accident-modal-btn" class="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition-colors">
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mt-6 space-y-6">
+                            <div>
+                                <label for="last_accident_date_modal" class="block text-sm font-medium text-gray-700">Tanggal Kecelakaan</label>
+                                <div class="mt-2">
+                                    <input type="date" id="last_accident_date_modal" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="accident_description_modal" class="block text-sm font-medium text-gray-700">Keterangan Singkat</label>
+                                <div class="mt-2">
+                                    <textarea id="accident_description_modal" rows="4" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" placeholder="Jelaskan secara singkat apa yang terjadi..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 flex items-center justify-end gap-x-3">
+                            <button type="button" id="cancel-accident-btn" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Batal</button>
+                            <button type="button" id="saveAccidentDetails" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-sm">Simpan Detail</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -101,6 +138,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // JS variables to hold the new accident details
+            let lastAccidentDateToSave = null;
+            let accidentDescriptionToSave = null;
+
             // Admin Panel Elements
             const startDateInput = document.getElementById('startDateInput');
             const safeWorkingDaysInput = document.getElementById('safeWorkingDaysInput');
@@ -112,11 +153,23 @@
             const saveChangesButton = document.getElementById('saveChanges');
             const resetDataButton = document.getElementById('resetData');
 
+            // Accident Details Modal Elements
+            const accidentModal = document.getElementById('accident-details-modal');
+            const openAccidentModalBtn = document.getElementById('accidentCountAdd');
+            const closeAccidentModalBtn = document.getElementById('close-accident-modal-btn');
+            const cancelAccidentBtn = document.getElementById('cancel-accident-btn');
+            const saveAccidentDetailsBtn = document.getElementById('saveAccidentDetails');
+            const lastAccidentDateModalInput = document.getElementById('last_accident_date_modal');
+            const accidentDescriptionModalInput = document.getElementById('accident_description_modal');
+            
+            // --- MAIN SAVE FUNCTION ---
             async function saveData() {
                 const data = {
                     start_date: startDateInput.value,
                     safe_working_days: parseInt(safeWorkingDaysInput.value),
                     accident_count: parseInt(accidentCountInput.value),
+                    last_accident_date: lastAccidentDateToSave,
+                    accident_description: accidentDescriptionToSave,
                 };
 
                 try {
@@ -135,14 +188,22 @@
                         alert(result.message);
                         window.location.reload();
                     } else {
-                        alert('Gagal menyimpan perubahan: ' + (result.message || 'Error tidak diketahui.'));
+                        let errorMessage = result.message || 'Error tidak diketahui.';
+                        if (result.errors) {
+                            errorMessage += '\n\nDetails:\n';
+                            for (const key in result.errors) {
+                                errorMessage += `- ${result.errors[key].join(', ')}\n`;
+                            }
+                        }
+                        alert('Gagal menyimpan perubahan: ' + errorMessage);
                     }
                 } catch (error) {
                     console.error('Error:', error);
                     alert('Terjadi kesalahan saat menyimpan data.');
                 }
             }
-
+            
+            // --- RESET DATA FUNCTION ---
             async function resetData() {
                 if (confirm('Apakah Anda yakin ingin mereset semua data? Ini tidak dapat dibatalkan.')) {
                     try {
@@ -152,9 +213,7 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                             }
                         });
-
                         const result = await response.json();
-
                         if (result.success) {
                             alert(result.message);
                             window.location.reload();
@@ -168,23 +227,77 @@
                 }
             }
 
-            // Admin Panel Event Listeners
+            // --- ACCIDENT MODAL FUNCTIONS ---
+            const openAccidentModal = () => {
+                if (!accidentModal) return;
+                lastAccidentDateModalInput.value = new Date().toISOString().slice(0,10);
+                accidentDescriptionModalInput.value = '';
+                accidentModal.classList.remove('hidden');
+                setTimeout(() => {
+                    accidentModal.classList.remove('opacity-0');
+                    accidentModal.querySelector('[role="dialog"]').classList.remove('opacity-0', 'scale-95');
+                }, 50);
+            };
+
+            const closeAccidentModal = () => {
+                if (!accidentModal) return;
+                accidentModal.classList.add('opacity-0');
+                accidentModal.querySelector('[role="dialog"]').classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    accidentModal.classList.add('hidden');
+                }, 300);
+            };
+            
+            // --- EVENT LISTENERS ---
             if(saveChangesButton) {
+                // Safe Days buttons
                 safeWorkingDaysAdd.addEventListener('click', () => {
                     safeWorkingDaysInput.value = parseInt(safeWorkingDaysInput.value) + 1;
                 });
                 safeWorkingDaysSubtract.addEventListener('click', () => {
                     safeWorkingDaysInput.value = Math.max(0, parseInt(safeWorkingDaysInput.value) - 1);
                 });
-                accidentCountAdd.addEventListener('click', () => {
-                    const currentAccidents = parseInt(accidentCountInput.value);
-                    accidentCountInput.value = currentAccidents + 1;
-                });
+
+                // Accident Count buttons
+                openAccidentModalBtn.addEventListener('click', openAccidentModal);
+                
                 accidentCountSubtract.addEventListener('click', () => {
                     accidentCountInput.value = Math.max(0, parseInt(accidentCountInput.value) - 1);
                 });
+
+                // Main Save/Reset buttons
                 saveChangesButton.addEventListener('click', saveData);
                 resetDataButton.addEventListener('click', resetData);
+
+                // Modal buttons
+                closeAccidentModalBtn.addEventListener('click', closeAccidentModal);
+                cancelAccidentBtn.addEventListener('click', closeAccidentModal);
+                saveAccidentDetailsBtn.addEventListener('click', () => {
+                    if (!lastAccidentDateModalInput.value) {
+                        alert('Tanggal kecelakaan tidak boleh kosong.');
+                        return;
+                    }
+                    // Populate the JS variables
+                    lastAccidentDateToSave = lastAccidentDateModalInput.value;
+                    accidentDescriptionToSave = accidentDescriptionModalInput.value;
+                    
+                    // Increment the counter
+                    accidentCountInput.value = parseInt(accidentCountInput.value) + 1;
+                    
+                    closeAccidentModal();
+                });
+
+                // Modal close on escape/outside click
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !accidentModal.classList.contains('hidden')) {
+                        closeAccidentModal();
+                    }
+                });
+                accidentModal.addEventListener('click', (e) => {
+                    if (e.target === accidentModal) {
+                        closeAccidentModal();
+                    }
+                });
             }
 
             // Display Mode Toggle Logic
@@ -199,17 +312,15 @@
                 if (displayModeVideo.checked) {
                     videoInputContainer.classList.remove('hidden');
                     imageInputContainer.classList.add('hidden');
-                    dashboardImageInput.value = ''; // Clear file input when switching away
+                    dashboardImageInput.value = '';
                 } else if (displayModeImage.checked) {
                     videoInputContainer.classList.add('hidden');
                     imageInputContainer.classList.remove('hidden');
-                    videoUrlInput.value = ''; // Clear video URL when switching away
+                    videoUrlInput.value = '';
                 }
             }
 
-            // Initial state
             toggleDisplayInputs();
-
             displayModeVideo.addEventListener('change', toggleDisplayInputs);
             displayModeImage.addEventListener('change', toggleDisplayInputs);
         });

@@ -83,6 +83,12 @@ Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
         Route::post('/admin/display/update', [AdminHseController::class, 'updateDisplaySettings'])->name('admin_display_update');
         Route::post('/admin/stats/update', [AdminHseController::class, 'updateStats'])->name('admin_stats_update');
         Route::post('/admin/stats/reset', [AdminHseController::class, 'resetStats'])->name('admin_stats_reset');
+        
+        // Accident Log Management
+        Route::get('/admin/accidents', [AdminHseController::class, 'indexAccidents'])->name('admin_accidents.index');
+        Route::get('/admin/accidents/{id}/edit', [AdminHseController::class, 'editAccident'])->name('admin_accidents.edit');
+        Route::put('/admin/accidents/{id}', [AdminHseController::class, 'updateAccident'])->name('admin_accidents.update');
+        Route::delete('/admin/accidents/{id}', [AdminHseController::class, 'destroyAccident'])->name('admin_accidents.destroy');
     });
 
     // User HSE Dashboard
