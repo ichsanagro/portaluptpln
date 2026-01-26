@@ -118,6 +118,14 @@
                 </svg>
                 Kelola Kecelakaan
             </a>
+            <a href="{{ route('hse.admin_playlist.index') }}"
+                class="{{ request()->routeIs('hse.admin_playlist.index') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+                <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75h4.5a3 3 0 013 3v4.5a3 3 0 01-3 3h-4.5a3 3 0 01-3-3v-4.5a3 3 0 013-3z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75h4.5a3 3 0 013 3v4.5a3 3 0 01-3 3h-4.5a3 3 0 01-3-3v-4.5a3 3 0 013-3z" />
+                </svg>
+                Kelola Playlist
+            </a>
             <a href="{{ route('hse.admin_substations.index') }}"
                 class="{{ request()->routeIs('hse.admin_substations.index') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
                 <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

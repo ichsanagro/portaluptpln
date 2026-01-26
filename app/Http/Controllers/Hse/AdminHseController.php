@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Hse;
 use App\Http\Controllers\Controller;
 use App\Models\AccidentLog;
 use App\Models\HseStat;
+use App\Models\PlaylistVideo;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -204,5 +205,54 @@ class AdminHseController extends Controller
         }
 
         return redirect()->route('hse.admin_accidents.index')->with('success', 'Data kecelakaan berhasil dihapus.');
+    }
+
+    public function playlist()
+    {
+        $videos = PlaylistVideo::orderBy('order')->get();
+        return view('hse.admin.playlist', compact('videos'));
+    }
+
+    public function playlistStore(Request $request)
+    {
+        $request->validate([
+            'videos.*' => 'required|mimetypes:video/mp4,video/avi,video/mpeg|max:5242880', // 5GB Max
+        ]);
+
+        if ($request->hasFile('videos')) {
+            foreach ($request->file('videos') as $file) {
+                $path = $file->store('playlist_videos', 'public');
+                PlaylistVideo::create([
+                    'path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'order' => PlaylistVideo::max('order') + 1,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Videos uploaded successfully.');
+    }
+
+    public function playlistDestroy($id)
+    {
+        $video = PlaylistVideo::findOrFail($id);
+        Storage::disk('public')->delete($video->path);
+        $video->delete();
+
+        return back()->with('success', 'Video deleted successfully.');
+    }
+
+    public function playlistUpdateOrder(Request $request)
+    {
+        $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'integer',
+        ]);
+
+        foreach ($request->order as $index => $id) {
+            PlaylistVideo::where('id', $id)->update(['order' => $index]);
+        }
+
+        return response()->json(['status' => 'success']);
     }
 }

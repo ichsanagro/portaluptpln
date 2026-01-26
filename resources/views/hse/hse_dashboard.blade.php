@@ -46,7 +46,12 @@
 
         {{-- Display Content Component --}}
         <div class="bg-white p-1 rounded-lg shadow-lg flex-grow min-h-0 flex items-center justify-center">
-            @if(($displayMode ?? 'video') === 'image' && $imageUrl)
+            @if(isset($videos) && $videos->count() > 0)
+                <video id="playlist-player" class="w-full h-full object-contain rounded-lg" controls autoplay muted>
+                    <source src="" type="video/mp4">
+                    Browser Anda tidak mendukung tag video.
+                </video>
+            @elseif(($displayMode ?? 'video') === 'image' && $imageUrl)
                 <img src="{{ $imageUrl }}" alt="Dashboard Display Image" class="w-full h-full object-contain rounded-lg">
             @else
                 <x-video-player type="url" src="{{ $videoUrl ?? 'https://youtu.be/HNLm9a5brfQ?si=aozePA9WCMtFF-TV' }}" />
@@ -55,5 +60,38 @@
 
     </div>
 
+    @if(isset($videos) && $videos->count() > 0)
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const player = document.getElementById('playlist-player');
+            const playlist = @json($videos->map(function($video) {
+                return asset('storage/' . $video->path);
+            }));
+            let currentVideoIndex = 0;
+
+            function playVideo(index) {
+                if (index >= 0 && index < playlist.length) {
+                    player.src = playlist[index];
+                    player.load();
+                    player.play().catch(e => console.error("Autoplay was prevented:", e));
+                    currentVideoIndex = index;
+                }
+            }
+
+            player.addEventListener('ended', function () {
+                currentVideoIndex++;
+                if (currentVideoIndex >= playlist.length) {
+                    currentVideoIndex = 0; // Loop playlist
+                }
+                playVideo(currentVideoIndex);
+            });
+
+            // Start playback
+            if (playlist.length > 0) {
+                playVideo(0);
+            }
+        });
+    </script>
+    @endif
 </body>
 </html>

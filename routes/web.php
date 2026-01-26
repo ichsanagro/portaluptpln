@@ -99,6 +99,12 @@ Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
     
         // Substation Management
         Route::resource('/admin/substations', \App\Http\Controllers\Hse\SubstationController::class)->names('admin_substations');
+    
+        // Playlist Management
+        Route::get('/admin/playlist', [AdminHseController::class, 'playlist'])->name('admin_playlist.index');
+        Route::post('/admin/playlist', [AdminHseController::class, 'playlistStore'])->name('admin_playlist.store');
+        Route::delete('/admin/playlist/{id}', [AdminHseController::class, 'playlistDestroy'])->name('admin_playlist.destroy');
+        Route::post('/admin/playlist/update-order', [AdminHseController::class, 'playlistUpdateOrder'])->name('admin_playlist.update_order');
     });
 
     // User HSE Dashboard
