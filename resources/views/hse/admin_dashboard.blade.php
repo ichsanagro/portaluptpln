@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>HSE Admin Dashboard</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col font-sans antialiased">
+@extends('layouts.app')
+
+@section('title', 'HSE Admin Dashboard')
+
+@section('content')
     <div class="flex-grow p-4 sm:p-6 lg:p-8">
         <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-xl p-6 sm:p-8 lg:p-10">
             <h1 class="text-3xl sm:text-4xl font-extrabold mb-8 text-center text-blue-800">HSE Admin Dashboard</h1>
@@ -135,7 +130,9 @@
 
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // JS variables to hold the new accident details
@@ -325,5 +322,4 @@
             displayModeImage.addEventListener('change', toggleDisplayInputs);
         });
     </script>
-</body>
-</html>
+@endpush
