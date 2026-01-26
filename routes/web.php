@@ -43,6 +43,13 @@ Route::post('/login', function (Illuminate\Http\Request $request) {
     ])->onlyInput('email');
 })->name('login.attempt');
 
+Route::post('/logout', function (Illuminate\Http\Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect('/login');
+})->name('logout');
+
 Route::prefix('logistik')->name('logistik.')->group(function () {
     Route::middleware(['auth', 'role:admin logistik'])->group(function () {
         Route::get('/adminlogistik/dashboard', [MaterialController::class, 'dashboard'])->name('adminlogistik.dashboard');
