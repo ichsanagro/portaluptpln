@@ -115,7 +115,7 @@
                                 <form action="{{ route('logistik.adminlogistik.material.destroy', $material->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus material ini?')">Hapus</button>
+                                    <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="confirmDelete(event)">Hapus</button>
                                 </form>
                             </td>
                         </tr>
@@ -326,6 +326,26 @@
 
 @push('scripts')
 <script>
+    function confirmDelete(event) {
+        event.preventDefault(); // Prevent form submission
+        const form = event.target.closest('form');
+
+        Swal.fire({
+            title: 'Anda Yakin?',
+            text: "Material ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        })
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         // --- MODAL ELEMENTS ---
         const modal = document.getElementById('tambah-material-modal');
@@ -529,7 +549,7 @@
                                 <form action="${deleteUrl}" method="POST" class="inline">
                                     <input type="hidden" name="_token" value="${csrfToken}">
                                     <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus material ini?')">Hapus</button>
+                                    <button type="submit" class="ml-4 text-red-600 hover:text-red-900" onclick="confirmDelete(event)">Hapus</button>
                                 </form>
                             </td>
                         </tr>

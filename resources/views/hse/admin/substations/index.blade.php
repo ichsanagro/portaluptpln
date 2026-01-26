@@ -37,7 +37,7 @@
                                 <form action="{{ route('hse.admin_substations.destroy', $substation->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Hapus</button>
+                                    <button type="button" onclick="confirmDelete(this)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Hapus</button>
                                 </form>
                             </td>
                         </tr>
@@ -48,3 +48,26 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function confirmDelete(button) {
+        const form = button.closest('form');
+        
+        Swal.fire({
+            title: 'Anda Yakin?',
+            text: "Gardu induk ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        })
+    }
+</script>
+@endpush

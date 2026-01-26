@@ -63,10 +63,10 @@
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ \Carbon\Carbon::parse($log->created_at)->format('d M Y, H:i') }}</td>
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <a href="{{ route('hse.admin_accidents.edit', $log->id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
-                                <form action="{{ route('hse.admin_accidents.destroy', $log->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data kecelakaan ini? Ini akan mengurangi jumlah total kecelakaan.');">
+                                <form action="{{ route('hse.admin_accidents.destroy', $log->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="ml-4 text-red-600 hover:text-red-900">Hapus</button>
+                                    <button type="button" onclick="confirmDelete(this)" class="ml-4 text-red-600 hover:text-red-900">Hapus</button>
                                 </form>
                             </td>
                         </tr>
@@ -85,3 +85,26 @@
     </div>
 </x-card>
 @endsection
+
+@push('scripts')
+<script>
+    function confirmDelete(button) {
+        const form = button.closest('form');
+        
+        Swal.fire({
+            title: 'Anda Yakin?',
+            text: "Data kecelakaan ini akan dihapus. Ini akan mengurangi jumlah total kecelakaan.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        })
+    }
+</script>
+@endpush
