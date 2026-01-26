@@ -41,7 +41,7 @@
 
         {{-- Real-Time Monitoring Component --}}
         <div class="bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
-            @include('components.real-time-monitoring')
+            @include('components.real-time-monitoring', ['substations' => $substations])
         </div>
 
         {{-- Display Content Component --}}

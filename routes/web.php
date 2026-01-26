@@ -89,6 +89,9 @@ Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
         Route::get('/admin/accidents/{id}/edit', [AdminHseController::class, 'editAccident'])->name('admin_accidents.edit');
         Route::put('/admin/accidents/{id}', [AdminHseController::class, 'updateAccident'])->name('admin_accidents.update');
         Route::delete('/admin/accidents/{id}', [AdminHseController::class, 'destroyAccident'])->name('admin_accidents.destroy');
+    
+        // Substation Management
+        Route::resource('/admin/substations', \App\Http\Controllers\Hse\SubstationController::class)->names('admin_substations');
     });
 
     // User HSE Dashboard
