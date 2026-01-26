@@ -182,45 +182,99 @@
                     const result = await response.json();
 
                     if (result.success) {
-                        alert(result.message);
-                        window.location.reload();
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.reload();
+                        });
                     } else {
                         let errorMessage = result.message || 'Error tidak diketahui.';
                         if (result.errors) {
-                            errorMessage += '\n\nDetails:\n';
+                            errorMessage = '<div class="text-left"><strong>Detail Error:</strong><ul class="list-disc list-inside">';
                             for (const key in result.errors) {
-                                errorMessage += `- ${result.errors[key].join(', ')}\n`;
+                                errorMessage += `<li>${result.errors[key].join(', ')}</li>`;
                             }
+                            errorMessage += '</ul></div>';
                         }
-                        alert('Gagal menyimpan perubahan: ' + errorMessage);
+                        Swal.fire({
+                            title: 'Gagal Menyimpan Perubahan',
+                            html: errorMessage,
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'Tutup'
+                        });
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Terjadi kesalahan saat menyimpan data.');
+                    Swal.fire({
+                        title: 'Terjadi Kesalahan',
+                        text: 'Tidak dapat terhubung ke server. Silakan coba lagi nanti.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Tutup'
+                    });
                 }
             }
             
             // --- RESET DATA FUNCTION ---
-            async function resetData() {
-                if (confirm('Apakah Anda yakin ingin mereset semua data? Ini tidak dapat dibatalkan.')) {
-                    try {
-                        const response = await fetch('{{ route("hse.admin_stats_reset") }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            }
-                        });
-                        const result = await response.json();
-                        if (result.success) {
-                            alert(result.message);
-                            window.location.reload();
-                        } else {
-                            alert('Gagal mereset data: ' + (result.message || 'Error tidak diketahui.'));
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat mereset data.');
+            function resetData() {
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Anda akan mereset semua data statistik. Ini tidak dapat dibatalkan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, reset!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        performReset();
                     }
+                });
+            }
+
+            async function performReset() {
+                try {
+                    const response = await fetch('{{ route("hse.admin_stats_reset") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Gagal Mereset Data',
+                            text: result.message || 'Error tidak diketahui.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'Tutup'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Terjadi Kesalahan',
+                        text: 'Tidak dapat terhubung ke server saat mereset data.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Tutup'
+                    });
                 }
             }
 
@@ -271,7 +325,13 @@
                 cancelAccidentBtn.addEventListener('click', closeAccidentModal);
                 saveAccidentDetailsBtn.addEventListener('click', () => {
                     if (!lastAccidentDateModalInput.value) {
-                        alert('Tanggal kecelakaan tidak boleh kosong.');
+                        Swal.fire({
+                            title: 'Input Tidak Valid',
+                            text: 'Tanggal kecelakaan tidak boleh kosong.',
+                            icon: 'warning',
+                            confirmButtonColor: '#f8bb86',
+                            confirmButtonText: 'OK'
+                        });
                         return;
                     }
                     // Populate the JS variables
@@ -282,6 +342,17 @@
                     accidentCountInput.value = parseInt(accidentCountInput.value) + 1;
                     
                     closeAccidentModal();
+                    
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'info',
+                        title: 'Detail kecelakaan dicatat.',
+                        text: 'Klik "Simpan Perubahan" untuk menyimpan data ke server.',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true
+                    });
                 });
 
                 // Modal close on escape/outside click
