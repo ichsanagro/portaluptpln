@@ -26,6 +26,17 @@
         .animate-pulse-warning {
             animation: pulse-warning 2s infinite;
         }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
 <body class="font-sans antialiased">
@@ -34,12 +45,12 @@
         
         <h1 class="text-2xl font-bold text-center text-[#28a8e0] flex-shrink-0">HSE Dashboard</h1>
 
-        {{-- HSE Stats Component --}}
+        {{-- HSE Stats Component (static) --}}
         <div class="bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
-             @include('components.hse-stats')
+            @include('components.hse-stats')
         </div>
 
-        {{-- Real-Time Monitoring Component --}}
+        {{-- Real-Time Monitoring (will be made horizontally scrollable internally) --}}
         <div class="bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
             @include('components.real-time-monitoring', ['substations' => $substations])
         </div>

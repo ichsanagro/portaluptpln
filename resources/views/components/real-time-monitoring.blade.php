@@ -1,7 +1,9 @@
 <div>
     <h2 class="text-lg font-bold text-center mb-2 text-[#28a8e0]">Monitoring Cuaca Real-Time</h2>
-    <div id="weather-widgets-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {{-- Weather widgets will be loaded here by JavaScript --}}
+    <div id="weather-scroll-container" class="overflow-x-auto scrollbar-hide pb-2">
+        <div id="weather-widgets-container" class="flex gap-4">
+            {{-- Weather widgets will be loaded here by JavaScript --}}
+        </div>
     </div>
 </div>
 
@@ -45,6 +47,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     : createErrorWidget(station);
                 container.innerHTML += widgetHtml;
             });
+
+            // Start auto-scrolling after widgets are rendered
+            const scrollContainer = document.getElementById('weather-scroll-container');
+            if (scrollContainer && scrollContainer.scrollWidth > scrollContainer.clientWidth) {
+                let scrolling = true;
+
+                function autoScroll() {
+                    if (scrolling) {
+                        scrollContainer.scrollLeft += 1;
+                        if (scrollContainer.scrollLeft >= (scrollContainer.scrollWidth - scrollContainer.clientWidth)) {
+                            scrollContainer.scrollLeft = 0;
+                        }
+                    }
+                    requestAnimationFrame(autoScroll);
+                }
+                
+                scrollContainer.addEventListener('mouseenter', () => scrolling = false);
+                scrollContainer.addEventListener('mouseleave', () => scrolling = true);
+
+                requestAnimationFrame(autoScroll);
+            }
         });
 
     function createWeatherWidget(station, weather) {
@@ -54,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const humidity = weather.relative_humidity_2m;
 
         return `
-            <div class="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between border border-gray-200">
+            <div class="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between border border-gray-200" style="min-width: 250px;">
                 <div>
                     <h3 class="text-lg font-bold text-gray-800">${station.name}</h3>
                     <div class="flex items-center justify-center mt-4">
