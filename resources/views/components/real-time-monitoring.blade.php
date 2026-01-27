@@ -77,22 +77,28 @@ document.addEventListener('DOMContentLoaded', function () {
         const humidity = weather.relative_humidity_2m;
 
         return `
-            <div class="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between border border-gray-200" style="min-width: 250px;">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800">${station.name}</h3>
-                    <div class="flex items-center justify-center mt-4">
-                        <div class="text-5xl font-bold text-gray-800">
-                            ${temperature}&deg;
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-2xl text-gray-600">
-                                ${weatherIcon}
-                            </div>
-                        </div>
+            <div class="bg-white p-4 rounded-lg shadow-md flex flex-col border border-gray-200" style="min-width: 250px;">
+                <h3 class="text-lg font-bold text-gray-800 text-center flex items-center justify-center h-14">${station.name}</h3>
+                
+                {{-- Temperature and Icon --}}
+                <div class="flex items-center justify-center my-4">
+                    <div class="text-5xl font-bold text-gray-800 leading-none">
+                        ${temperature}&deg;
                     </div>
-                    <div class="text-center text-gray-600 mt-2">
-                        <p>Angin: ${windSpeed} km/h</p>
-                        <p>Kelembapan: ${humidity}%</p>
+                    <div class="ml-2 text-4xl text-gray-600 leading-none">
+                        ${weatherIcon}
+                    </div>
+                </div>
+
+                {{-- Wind and Humidity Details --}}
+                <div class="mt-auto text-sm text-gray-700">
+                    <div class="flex justify-between items-center py-1 border-t border-gray-200">
+                        <span>Angin:</span>
+                        <span class="font-semibold">${windSpeed} km/h</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-t border-gray-200">
+                        <span>Kelembapan:</span>
+                        <span class="font-semibold">${humidity}%</span>
                     </div>
                 </div>
             </div>
