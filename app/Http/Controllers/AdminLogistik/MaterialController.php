@@ -19,15 +19,31 @@ class MaterialController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $sortBy = $request->input('sort_by', 'nama_material'); // Default sort by nama_material
+        $sortDirection = $request->input('sort_direction', 'asc'); // Default sort direction ascending
+
+        // Define allowed sortable columns
+        $allowedSortColumns = ['nama_material', 'stok', 'satuan', 'jenis_kebutuhan', 'lokasi'];
+
+        // Validate sort column and direction
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'nama_material'; // Fallback to default
+        }
+        if (!in_array($sortDirection, ['asc', 'desc'])) {
+            $sortDirection = 'asc'; // Fallback to default
+        }
+
         $materials = Material::when($search, function ($query, $search) {
             return $query->where('nama_material', 'like', '%' . $search . '%');
-        })->get();
+        })
+        ->orderBy($sortBy, $sortDirection)
+        ->get();
 
         if ($request->ajax()) {
             return response()->json(['materials' => $materials]);
         }
 
-        return view('logistik.adminlogistik.material', compact('materials', 'search'));
+        return view('logistik.adminlogistik.material', compact('materials', 'search', 'sortBy', 'sortDirection'));
     }
 
     public function dashboard()

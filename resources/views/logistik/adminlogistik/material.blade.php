@@ -52,13 +52,52 @@
                 <p class="mt-1 text-sm text-slate-600">Cari, tambah, atau kelola semua material yang terdaftar.</p>
             </div>
             <div class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
-                {{-- Search Box --}}
-                <div class="relative w-full sm:w-auto">
-                    <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 transform text-slate-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                    </svg>
-                    <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material..." value="{{ $search ?? '' }}">
-                </div>
+                {{-- Search Box and Sort Controls --}}
+                <form action="{{ route('logistik.adminlogistik.material.index') }}" method="GET" id="material-filter-form" class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-auto">
+                        <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 transform text-slate-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                        <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material..." value="{{ $search ?? '' }}">
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-l sm:border-t-0 border-t border-slate-200 pl-3 pt-2 sm:py-0 sm:pl-0 sm:pt-0">
+                        <span class="text-sm font-semibold text-slate-800 whitespace-nowrap">Urutkan:</span>
+                        <div class="flex items-center gap-2">
+                            <label for="sort_by" class="sr-only">Sort By:</label>
+                            <div class="relative w-full sm:w-auto">
+                                <select name="sort_by" id="sort_by" class="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none">
+                                    <option value="nama_material" {{ $sortBy == 'nama_material' ? 'selected' : '' }}>Nama Material</option>
+                                    <option value="stok" {{ $sortBy == 'stok' ? 'selected' : '' }}>Stok</option>
+                                    <option value="satuan" {{ $sortBy == 'satuan' ? 'selected' : '' }}>Satuan</option>
+                                    <option value="jenis_kebutuhan" {{ $sortBy == 'jenis_kebutuhan' ? 'selected' : '' }}>Jenis Kebutuhan</option>
+                                    <option value="lokasi" {{ $sortBy == 'lokasi' ? 'selected' : '' }}>Lokasi</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label for="sort_direction" class="sr-only">Order:</label>
+                            <div class="relative w-full sm:w-auto">
+                                <select name="sort_direction" id="sort_direction" class="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none">
+                                    <option value="asc" {{ $sortDirection == 'asc' ? 'selected' : '' }}>Ascending</option>
+                                    <option value="desc" {{ $sortDirection == 'desc' ? 'selected' : '' }}>Descending</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
 
                 {{-- Export Button --}}
                 <a href="{{ route('logistik.adminlogistik.material.export') }}" class="flex items-center justify-center gap-2 rounded-md bg-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
@@ -358,8 +397,11 @@
         const closeDetailModalBtn = document.getElementById('close-detail-modal-btn');
         const closeDetailBtn = document.getElementById('close-detail-btn');
 
-        // --- SEARCH ELEMENTS ---
+        // --- FILTER AND SORT ELEMENTS ---
+        const materialFilterForm = document.getElementById('material-filter-form');
         const searchInput = document.getElementById('search');
+        const sortBySelect = document.getElementById('sort_by');
+        const sortDirectionSelect = document.getElementById('sort_direction');
         const tableBody = document.getElementById('material-table-body');
         const editUrlTemplate = '{{ route('logistik.adminlogistik.material.edit', ['id' => ':id']) }}';
         const deleteUrlTemplate = '{{ route('logistik.adminlogistik.material.destroy', ['id' => ':id']) }}';
@@ -508,9 +550,11 @@
         @endif
 
 
-        // --- SEARCH FUNCTIONS ---
-        function fetchMaterials(searchQuery) {
-            const url = `{{ route('logistik.adminlogistik.material.index') }}?search=${searchQuery}`;
+        // --- SEARCH AND SORT FUNCTIONS ---
+        // This function is still needed for AJAX calls, e.g., if a search is performed via AJAX without a full page reload.
+        // However, for direct sorting via dropdowns, we'll submit the form.
+        function fetchMaterials(searchQuery, sortBy, sortDirection) {
+            const url = `{{ route('logistik.adminlogistik.material.index') }}?search=${searchQuery}&sort_by=${sortBy}&sort_direction=${sortDirection}`;
 
             fetch(url, {
                 headers: {
@@ -566,14 +610,30 @@
             }
         }
         
-        // --- SEARCH EVENT LISTENER ---
-        if (searchInput) {
+        // --- FILTER AND SORT EVENT LISTENERS ---
+        if (materialFilterForm) {
+            // For initial load, set current values to form if they exist
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('sort_by')) {
+                sortBySelect.value = urlParams.get('sort_by');
+            }
+            if (urlParams.has('sort_direction')) {
+                sortDirectionSelect.value = urlParams.get('sort_direction');
+            }
+
+            sortBySelect.addEventListener('change', function() {
+                materialFilterForm.submit();
+            });
+
+            sortDirectionSelect.addEventListener('change', function() {
+                materialFilterForm.submit();
+            });
+
             let debounceTimer;
             searchInput.addEventListener('keyup', function () {
-                const searchQuery = this.value;
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
-                    fetchMaterials(searchQuery);
+                    materialFilterForm.submit();
                 }, 300); // 300ms delay
             });
         }
