@@ -16,6 +16,7 @@ Route::get('/login', function () {
 })->name('login');
 
 use App\Http\Controllers\SuperAdmin\UserController;
+use App\Http\Controllers\SuperAdmin\DashboardController;
 
 Route::post('/login', function (Illuminate\Http\Request $request) {
     $credentials = $request->validate([
@@ -57,9 +58,13 @@ Route::post('/logout', function (Illuminate\Http\Request $request) {
 
 // Super Admin Routes
 Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'role:super admin'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('superadmin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/monitoring/material', [DashboardController::class, 'monitoringMaterial'])->name('monitoring.material.index');
+    Route::get('/monitoring/material/{id}', [DashboardController::class, 'showMaterial'])->name('monitoring.material.show');
+    Route::get('/monitoring/riwayat', [DashboardController::class, 'monitoringRiwayat'])->name('monitoring.riwayat.index');
+    Route::get('/monitoring/riwayat/{id}', [DashboardController::class, 'showRiwayat'])->name('monitoring.riwayat.show');
+    Route::get('/monitoring/kerusakan', [DashboardController::class, 'monitoringKerusakan'])->name('monitoring.kerusakan.index');
+    Route::get('/monitoring/kecelakaan', [DashboardController::class, 'monitoringKecelakaan'])->name('monitoring.kecelakaan.index');
     Route::resource('users', UserController::class);
 });
 
