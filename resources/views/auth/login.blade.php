@@ -83,7 +83,7 @@
                             <label for="remember-me" class="ml-2 block text-gray-900">Ingat Saya</label>
                         </div>
                         <div class="text-sm">
-                            <a href="#" class="font-semibold text-blue-800 hover:text-blue-700">Lupa kata sandi?</a>
+                            <p class="font-semibold text-blue-800 hover:text-blue-700">Lupa kata sandi? Hubungi admin</p>
                         </div>
                     </div>
 
@@ -95,11 +95,7 @@
                     </div>
                 </form>
 
-                {{-- Sign up Link --}}
-                <p class="mt-8 text-center text-gray-700">
-                    Belum punya akun?
-                    <a href="#" class="font-semibold leading-6 text-blue-800 hover:text-blue-700">Daftar sekarang</a>
-                </p>
+                
             </x-card>
         </div>
     </div>
