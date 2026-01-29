@@ -15,6 +15,8 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+use App\Http\Controllers\SuperAdmin\UserController;
+
 Route::post('/login', function (Illuminate\Http\Request $request) {
     $credentials = $request->validate([
         'email' => ['required', 'email'],
@@ -25,7 +27,9 @@ Route::post('/login', function (Illuminate\Http\Request $request) {
         $request->session()->regenerate();
         $user = Auth::user();
 
-        if ($user->hasRole('admin logistik')) {
+        if ($user->hasRole('super admin')) {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($user->hasRole('admin logistik')) {
             return redirect()->route('logistik.adminlogistik.dashboard');
         } elseif ($user->hasRole('user logistik')) {
             return redirect()->route('logistik.userlogistik.dashboard');
@@ -49,6 +53,15 @@ Route::post('/logout', function (Illuminate\Http\Request $request) {
     $request->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
+
+
+// Super Admin Routes
+Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'role:super admin'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('superadmin.dashboard');
+    })->name('dashboard');
+    Route::resource('users', UserController::class);
+});
 
 Route::prefix('logistik')->name('logistik.')->group(function () {
     Route::middleware(['auth', 'role:admin logistik'])->group(function () {
