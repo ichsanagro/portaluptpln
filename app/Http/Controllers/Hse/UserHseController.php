@@ -26,4 +26,11 @@ class UserHseController extends Controller
             'videos' => $videos,
         ]);
     }
+
+    public function monitoringIot(Substation $substation)
+    {
+        return view('hse.monitoring_iot', [
+            'substation' => $substation,
+        ]);
+    }
 }

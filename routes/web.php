@@ -128,5 +128,6 @@ Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
     // User HSE Dashboard
     Route::middleware('role:user hse')->group(function () {
         Route::get('/dashboard', [UserHseController::class, 'dashboard'])->name('dashboard');
+        Route::get('/monitoring-iot/{substation}', [UserHseController::class, 'monitoringIot'])->name('monitoring_iot');
     });
 });

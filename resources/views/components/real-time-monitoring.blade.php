@@ -75,9 +75,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const temperature = Math.round(weather.temperature_2m);
         const windSpeed = weather.wind_speed_10m;
         const humidity = weather.relative_humidity_2m;
+        const url = `/hse/monitoring-iot/${station.id}`;
 
         return `
-            <div class="bg-white p-4 rounded-lg shadow-md flex flex-col border border-gray-200" style="min-width: 250px;">
+            <a href="${url}" class="block bg-white p-4 rounded-lg shadow-md flex flex-col border border-gray-200 hover:shadow-xl hover:border-blue-500 transition" style="min-width: 250px;">
                 <h3 class="text-lg font-bold text-gray-800 text-center flex items-center justify-center h-14">${station.name}</h3>
                 
                 {{-- Temperature and Icon --}}
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="font-semibold">${humidity}%</span>
                     </div>
                 </div>
-            </div>
+            </a>
         `;
     }
 
