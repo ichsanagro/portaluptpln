@@ -1,11 +1,57 @@
 <div>
     <h2 class="text-lg font-bold text-center mb-2 text-[#28a8e0]">Monitoring Cuaca Real-Time</h2>
-    <div id="weather-scroll-container" class="overflow-x-auto scrollbar-hide pb-2">
+    <div id="weather-scroll-container" class="overflow-x-auto pb-2">
         <div id="weather-widgets-container" class="flex gap-4">
             {{-- Weather widgets will be loaded here by JavaScript --}}
         </div>
     </div>
 </div>
+
+<style>
+    #weather-scroll-container::-webkit-scrollbar {
+        height: 8px;
+        /* Initially hidden */
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    #weather-scroll-container:hover::-webkit-scrollbar {
+        /* Visible on hover */
+        opacity: 1;
+    }
+    #weather-scroll-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+        /* Initially hidden */
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    #weather-scroll-container:hover::-webkit-scrollbar-track {
+        /* Visible on hover */
+        opacity: 1;
+    }
+    #weather-scroll-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+        /* Initially hidden */
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    #weather-scroll-container:hover::-webkit-scrollbar-thumb {
+        /* Visible on hover */
+        background: #555; /* Darker on hover */
+        opacity: 1;
+    }
+    
+    /* For Firefox */
+    #weather-scroll-container {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent; /* Initially hidden */
+        transition: scrollbar-color 0.3s ease-in-out;
+    }
+    #weather-scroll-container:hover {
+        scrollbar-color: #888 #f1f1f1; /* Visible on hover */
+    }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -132,4 +178,3 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-
