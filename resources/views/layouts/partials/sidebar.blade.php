@@ -196,6 +196,13 @@
                     </svg>
                     Dashboard
                 </a>
+                <a href="{{ route('hse.monitoring_iot.all') }}"
+                   class="{{ request()->routeIs('hse.monitoring_iot.all') ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-700 hover:text-white' }} group flex items-center rounded-md px-2 py-2 text-sm font-medium">
+                    <svg class="mr-3 h-6 w-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.045A3.743 3.743 0 017.5 15.75a3.743 3.743 0 01-.788-.705m.788.705A3.733 3.733 0 0010.5 18a3.733 3.733 0 002.712-1.045m-2.712 1.045c.491.246.915.412 1.288.495m-3.576-.495a3.743 3.743 0 01-.788-.705m11.25 0a3.743 3.743 0 00.788-.705m-.788.705c-.491.246-.915.412-1.288.495m3.576-.495a3.743 3.743 0 00.788-.705M6 12a4.5 4.5 0 119 0a4.5 4.5 0 01-9 0zm9 0a4.5 4.5 0 10-9 0 4.5 4.5 0 009 0z" />
+                    </svg>
+                    Monitoring IoT
+                </a>
             @endif
         @endif
     </nav>

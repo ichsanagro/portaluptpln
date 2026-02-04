@@ -128,6 +128,9 @@ Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
     // User HSE Dashboard
     Route::middleware('role:user hse')->group(function () {
         Route::get('/dashboard', [UserHseController::class, 'dashboard'])->name('dashboard');
+        // This is the original route for specific substation monitoring
         Route::get('/monitoring-iot/{substation}', [UserHseController::class, 'monitoringIot'])->name('monitoring_iot');
+        // This is the new general monitoring dashboard for all data
+        Route::get('/monitoring-iot-all', [\App\Http\Controllers\Hse\MonitoringController::class, 'index'])->name('monitoring_iot.all');
     });
 });

@@ -3,7 +3,8 @@
 return [
     'host' => env('MQTT_HOST', 'broker.avisha.id'),
     'port' => env('MQTT_PORT', 1883),
-    'username' => env('MQTT_USERNAME', ''),
+    'username' => env('MQTT_USERNAME', 'bgmamat'),
     'password' => env('MQTT_PASSWORD', ''),
     'client_id' => env('MQTT_CLIENT_ID', 'laravel_mqtt_client'),
+    'topic' => env('MQTT_TOPIC', 'bgmamat/#'),
 ];
