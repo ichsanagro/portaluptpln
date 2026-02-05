@@ -1,9 +1,16 @@
+@php $hideSidebar = true; @endphp
 @extends('layouts.app')
 
 @section('title', 'Monitoring IOT - ' . $substation->name)
 
 @section('content')
 <div class="max-w-7xl mx-auto">
+    <div class="mb-4">
+        <a href="{{ route('hse.dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Kembali
+        </a>
+    </div>
     <h2 class="text-2xl font-bold text-blue-800 mb-6">Monitoring IOT: {{ $substation->name }}</h2>
     
     <div id="iot-device-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

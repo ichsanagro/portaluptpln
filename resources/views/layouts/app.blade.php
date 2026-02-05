@@ -11,11 +11,13 @@
 </head>
 <body class="h-full font-sans text-gray-900 antialiased">
     <div class="flex h-full">
-        {{-- Sidebar --}}
-        @include('layouts.partials.sidebar')
+        @unless(isset($hideSidebar) && $hideSidebar)
+            {{-- Sidebar --}}
+            @include('layouts.partials.sidebar')
+        @endunless
 
         {{-- Main Content Area --}}
-        <div class="relative flex flex-1 flex-col overflow-y-auto">
+        <div class="relative flex flex-1 flex-col overflow-y-auto @if(isset($hideSidebar) && $hideSidebar) w-full @endif">
             {{-- Top Bar --}}
             <header class="sticky top-0 z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white/75 backdrop-blur-lg px-4 sm:px-6 lg:px-8">
                 {{-- Page Title (Left) --}}
