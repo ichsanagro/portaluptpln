@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Hse;
 
 use App\Http\Controllers\Controller;
+use App\Models\IotDevice;
 use App\Models\Substation;
 use Illuminate\Http\Request;
 
@@ -55,6 +56,7 @@ class SubstationController extends Controller
      */
     public function edit(Substation $substation)
     {
+        $substation->load('iotDevices');
         return view('hse.admin.substations.edit', compact('substation'));
     }
 
@@ -84,5 +86,31 @@ class SubstationController extends Controller
 
         return redirect()->route('hse.admin_substations.index')
                          ->with('success', 'Substation deleted successfully.');
+    }
+
+    /**
+     * Store a newly created IoT device in storage.
+     */
+    public function storeDevice(Request $request, Substation $substation)
+    {
+        $request->validate([
+            'room' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'topic' => 'required|string|max:255|unique:iot_devices,topic',
+        ]);
+
+        $substation->iotDevices()->create($request->all());
+
+        return back()->with('success', 'IoT device added successfully.');
+    }
+
+    /**
+     * Remove the specified IoT device from storage.
+     */
+    public function destroyDevice(IotDevice $device)
+    {
+        $device->delete();
+
+        return back()->with('success', 'IoT device deleted successfully.');
     }
 }

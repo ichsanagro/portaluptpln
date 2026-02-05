@@ -102,6 +102,9 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
 });
 
 Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
+    // API for monitoring
+    Route::get('/api/monitoring-data/{substation}', [\App\Http\Controllers\Api\V1\MonitoringController::class, 'getMonitoringData'])->name('api.monitoring_data');
+
     // Admin HSE Dashboard
     Route::middleware('role:admin hse')->group(function () {
         Route::get('/admin/dashboard', [AdminHseController::class, 'dashboard'])->name('admin_dashboard');
@@ -116,7 +119,16 @@ Route::prefix('hse')->name('hse.')->middleware('auth')->group(function () {
         Route::delete('/admin/accidents/{id}', [AdminHseController::class, 'destroyAccident'])->name('admin_accidents.destroy');
     
         // Substation Management
-        Route::resource('/admin/substations', \App\Http\Controllers\Hse\SubstationController::class)->names('admin_substations');
+        Route::get('/admin/substations', [\App\Http\Controllers\Hse\SubstationController::class, 'index'])->name('admin_substations.index');
+        Route::get('/admin/substations/create', [\App\Http\Controllers\Hse\SubstationController::class, 'create'])->name('admin_substations.create');
+        Route::post('/admin/substations', [\App\Http\Controllers\Hse\SubstationController::class, 'store'])->name('admin_substations.store');
+        Route::get('/admin/substations/{substation}/edit', [\App\Http\Controllers\Hse\SubstationController::class, 'edit'])->name('admin_substations.edit');
+        Route::put('/admin/substations/{substation}', [\App\Http\Controllers\Hse\SubstationController::class, 'update'])->name('admin_substations.update');
+        Route::delete('/admin/substations/{substation}', [\App\Http\Controllers\Hse\SubstationController::class, 'destroy'])->name('admin_substations.destroy');
+
+        // IoT Device Management for a Substation
+        Route::post('/admin/substations/{substation}/devices', [\App\Http\Controllers\Hse\SubstationController::class, 'storeDevice'])->name('admin_substations.devices.store');
+        Route::delete('/admin/substations/devices/{device}', [\App\Http\Controllers\Hse\SubstationController::class, 'destroyDevice'])->name('admin_substations.devices.destroy');
     
         // Playlist Management
         Route::get('/admin/playlist', [AdminHseController::class, 'playlist'])->name('admin_playlist.index');

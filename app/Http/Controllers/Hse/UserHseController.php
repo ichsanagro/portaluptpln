@@ -29,6 +29,8 @@ class UserHseController extends Controller
 
     public function monitoringIot(Substation $substation)
     {
+        $substation->load('iotDevices.latestData');
+        
         return view('hse.monitoring_iot', [
             'substation' => $substation,
         ]);
