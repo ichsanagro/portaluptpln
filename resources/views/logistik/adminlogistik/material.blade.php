@@ -51,70 +51,50 @@
                 <h3 class="text-xl font-semibold text-slate-800">Daftar Material</h3>
                 <p class="mt-1 text-sm text-slate-600">Cari, tambah, atau kelola semua material yang terdaftar.</p>
             </div>
-            <div class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
-                {{-- Search Box and Sort Controls --}}
-                <form action="{{ route('logistik.adminlogistik.material.index') }}" method="GET" id="material-filter-form" class="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
-                    <div class="relative w-full sm:w-auto">
+            <div class="w-full sm:w-auto flex flex-wrap items-center gap-3">
+                <!-- Filter Form -->
+                <form action="{{ route('logistik.adminlogistik.material.index') }}" method="GET" id="material-filter-form" class="flex flex-wrap items-center gap-3">
+                    <!-- Search -->
+                    <div class="relative">
                         <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 transform text-slate-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                         </svg>
-                        <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material..." value="{{ $search ?? '' }}">
+                        <input type="text" name="search" id="search" class="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" placeholder="Cari material..." value="{{ $search ?? '' }}">
                     </div>
-
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-l sm:border-t-0 border-t border-slate-200 pl-3 pt-2 sm:py-0 sm:pl-0 sm:pt-0">
-                        <span class="text-sm font-semibold text-slate-800 whitespace-nowrap">Urutkan:</span>
-                        <div class="flex items-center gap-2">
-                            <label for="sort_by" class="sr-only">Sort By:</label>
-                            <div class="relative w-full sm:w-auto">
-                                <select name="sort_by" id="sort_by" class="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none">
-                                    <option value="nama_material" {{ $sortBy == 'nama_material' ? 'selected' : '' }}>Nama Material</option>
-                                    <option value="stok" {{ $sortBy == 'stok' ? 'selected' : '' }}>Stok</option>
-                                    <option value="satuan" {{ $sortBy == 'satuan' ? 'selected' : '' }}>Satuan</option>
-                                    <option value="jenis_kebutuhan" {{ $sortBy == 'jenis_kebutuhan' ? 'selected' : '' }}>Jenis Kebutuhan</option>
-                                    <option value="lokasi" {{ $sortBy == 'lokasi' ? 'selected' : '' }}>Lokasi</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
-                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <label for="sort_direction" class="sr-only">Order:</label>
-                            <div class="relative w-full sm:w-auto">
-                                <select name="sort_direction" id="sort_direction" class="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none">
-                                    <option value="asc" {{ $sortDirection == 'asc' ? 'selected' : '' }}>Ascending</option>
-                                    <option value="desc" {{ $sortDirection == 'desc' ? 'selected' : '' }}>Descending</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
-                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Sort -->
+                    <div class="flex items-center gap-2">
+                        <label for="sort_by" class="text-sm font-medium text-slate-600 whitespace-nowrap">Urutkan:</label>
+                        <select name="sort_by" id="sort_by" class="block w-full rounded-md border-0 py-2 pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none">
+                            <option value="nama_material" {{ $sortBy == 'nama_material' ? 'selected' : '' }}>Nama</option>
+                            <option value="stok" {{ $sortBy == 'stok' ? 'selected' : '' }}>Stok</option>
+                            <option value="satuan" {{ $sortBy == 'satuan' ? 'selected' : '' }}>Satuan</option>
+                            <option value="jenis_kebutuhan" {{ $sortBy == 'jenis_kebutuhan' ? 'selected' : '' }}>Jenis</option>
+                            <option value="lokasi" {{ $sortBy == 'lokasi' ? 'selected' : '' }}>Lokasi</option>
+                        </select>
+                        <select name="sort_direction" id="sort_direction" class="block w-full rounded-md border-0 py-2 pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none">
+                            <option value="asc" {{ $sortDirection == 'asc' ? 'selected' : '' }}>Asc</option>
+                            <option value="desc" {{ $sortDirection == 'desc' ? 'selected' : '' }}>Desc</option>
+                        </select>
                     </div>
                 </form>
-
-
-                {{-- Export Button --}}
-                <a href="{{ route('logistik.adminlogistik.material.export') }}" class="flex items-center justify-center gap-2 rounded-md bg-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
-                        <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.64L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
-                        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-                      </svg>
-                    <span>Ekspor</span>
-                </a>
-
-                {{-- Add Button --}}
-                <button type="button" id="open-modal-btn" class="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-                    <svg class="-ml-0.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                    </svg>
-                    <span>Tambah Material</span>
-                </button>
+                
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('logistik.adminlogistik.material.export') }}" class="flex items-center justify-center gap-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.64L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
+                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                        </svg>
+                        <span>Ekspor</span>
+                    </a>
+                    
+                    <button type="button" id="open-modal-btn" class="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                        <svg class="-ml-0.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                        </svg>
+                        <span>Tambah Material</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
