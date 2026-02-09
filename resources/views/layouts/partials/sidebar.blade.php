@@ -1,6 +1,7 @@
-<div class="flex h-screen w-64 flex-col bg-blue-900 text-white">
+<!-- Sidebar -->
+<div id="sidebar" class="fixed inset-y-0 left-0 z-30 flex h-screen w-64 flex-col bg-blue-900 text-white transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0">
     <!-- Sidebar Header -->
-    <div class="flex h-16 flex-shrink-0 items-center border-b border-blue-700 px-4">
+    <div class="flex h-16 flex-shrink-0 items-center justify-between border-b border-blue-700 px-4">
         @php
             $dashboardRoute = '/';
             if (Auth::check()) {
@@ -22,6 +23,12 @@
             </svg>
             <span class="text-xl font-bold">PLN UPT BENGKULU</span>
         </a>
+        <!-- Mobile Close Button -->
+        <button id="sidebar-close-btn" class="md:hidden rounded-md p-1 text-blue-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white">
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
     <!-- Navigation Links -->

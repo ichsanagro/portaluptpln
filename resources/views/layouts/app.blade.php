@@ -12,22 +12,31 @@
 <body class="h-full font-sans text-gray-900 antialiased">
     <div class="flex h-full">
         @unless(isset($hideSidebar) && $hideSidebar)
-            {{-- Sidebar --}}
+            <!-- Sidebar -->
             @include('layouts.partials.sidebar')
+            <!-- Sidebar Overlay -->
+            <div id="sidebar-overlay" class="fixed inset-0 z-20 bg-black/50 hidden md:hidden"></div>
         @endunless
 
-        {{-- Main Content Area --}}
+        <!-- Main Content Area -->
         <div class="relative flex flex-1 flex-col overflow-y-auto @if(isset($hideSidebar) && $hideSidebar) w-full @endif">
-            {{-- Top Bar --}}
+            <!-- Top Bar -->
             <header class="sticky top-0 z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white/75 backdrop-blur-lg px-4 sm:px-6 lg:px-8">
-                {{-- Page Title (Left) --}}
-                <div class="flex items-center">
+                <!-- Mobile Hamburger Button and Page Title -->
+                <div class="flex items-center gap-4">
+                    @unless(isset($hideSidebar) && $hideSidebar)
+                    <button id="sidebar-open-btn" class="md:hidden rounded-md p-1 text-gray-700 hover:bg-gray-100">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                    @endunless
                     <h1 class="text-xl font-semibold text-blue-800 truncate">
                         @yield('title', 'Dashboard')
                     </h1>
                 </div>
 
-                {{-- Right Aligned Items --}}
+                <!-- Right Aligned Items -->
                 <div class="flex items-center gap-x-4 sm:gap-x-6">
                     {{-- Page-specific header items --}}
                     @stack('header-items')
@@ -64,5 +73,41 @@
         </div>
     </div>
     @stack('scripts')
+    @unless(isset($hideSidebar) && $hideSidebar)
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('sidebar-open-btn');
+            const closeBtn = document.getElementById('sidebar-close-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            function openSidebar() {
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    overlay.classList.remove('hidden');
+                }
+            }
+
+            function closeSidebar() {
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            }
+
+            if (openBtn) {
+                openBtn.addEventListener('click', openSidebar);
+            }
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeSidebar);
+            }
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+        });
+    </script>
+    @endunless
 </body>
 </html>
