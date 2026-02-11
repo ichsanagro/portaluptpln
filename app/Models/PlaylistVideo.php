@@ -10,5 +10,8 @@ class PlaylistVideo extends Model
         'path',
         'original_name',
         'order',
+        'type',
+        'thumbnail_path',
+        'duration',
     ];
 }

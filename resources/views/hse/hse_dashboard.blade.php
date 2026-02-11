@@ -56,53 +56,93 @@
         </div>
 
         {{-- Display Content Component --}}
-        <div class="bg-white p-1 rounded-lg shadow-lg flex-grow min-h-0 flex items-center justify-center">
-            @if(isset($videos) && $videos->count() > 0)
-                <video id="playlist-player" class="w-full h-full object-contain rounded-lg" controls autoplay muted>
-                    <source src="" type="video/mp4">
-                    Browser Anda tidak mendukung tag video.
-                </video>
-            @elseif(($displayMode ?? 'video') === 'image' && $imageUrl)
-                <img src="{{ $imageUrl }}" alt="Dashboard Display Image" class="w-full h-full object-contain rounded-lg">
-            @else
-                <x-video-player type="url" src="{{ $videoUrl ?? 'https://youtu.be/HNLm9a5brfQ?si=aozePA9WCMtFF-TV' }}" />
-            @endif
+        <div id="media-player-container" class="bg-white p-1 rounded-lg shadow-lg flex-grow min-h-0 flex items-center justify-center">
+            {{-- Player will be dynamically inserted here. --}}
         </div>
 
     </div>
 
-    @if(isset($videos) && $videos->count() > 0)
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const player = document.getElementById('playlist-player');
-            const playlist = @json($videos->map(function($video) {
-                return asset('storage/' . $video->path);
-            }));
-            let currentVideoIndex = 0;
+    document.addEventListener('DOMContentLoaded', function () {
+        const playerContainer = document.getElementById('media-player-container');
+        let player = null;
+        let imageTimeout = null;
+        let currentMediaIndex = -1;
 
-            function playVideo(index) {
-                if (index >= 0 && index < playlist.length) {
-                    player.src = playlist[index];
-                    player.load();
-                    player.play().catch(e => console.error("Autoplay was prevented:", e));
-                    currentVideoIndex = index;
-                }
+        // Unified playlist from the new playlist feature
+        let playlist = {!! json_encode($playlistItems->map(function($item) {
+            return [
+                'src' => asset('storage/' . $item->path),
+                'type' => $item->type,
+                'duration' => $item->duration ?? 5, // Default 5s for images
+            ];
+        })->all()) !!};
+
+
+
+        function playNext() {
+            // If there's only one item and it's an image, don't loop, just hold.
+             if (playlist.length === 1 && playlist[0].type === 'image') {
+                playMedia(0); // Display the image and stop.
+                return;
             }
 
-            player.addEventListener('ended', function () {
-                currentVideoIndex++;
-                if (currentVideoIndex >= playlist.length) {
-                    currentVideoIndex = 0; // Loop playlist
-                }
-                playVideo(currentVideoIndex);
-            });
-
-            // Start playback
-            if (playlist.length > 0) {
-                playVideo(0);
+            currentMediaIndex++;
+            if (currentMediaIndex >= playlist.length) {
+                currentMediaIndex = 0; // Loop playlist
             }
-        });
+            playMedia(currentMediaIndex);
+        }
+
+        function playMedia(index) {
+            if (index < 0 || index >= playlist.length) {
+                playerContainer.innerHTML = '<div class="text-gray-500">Tidak ada media untuk ditampilkan.</div>';
+                return;
+            }
+
+            clearTimeout(imageTimeout);
+            currentMediaIndex = index;
+            const media = playlist[index];
+            playerContainer.innerHTML = '';
+
+            if (media.type === 'video') {
+                const video = document.createElement('video');
+                video.src = media.src;
+                video.autoplay = true;
+                video.muted = true;
+                video.className = 'w-full h-full object-contain rounded-lg';
+                video.addEventListener('ended', playNext);
+                video.addEventListener('error', function() {
+                    console.error('Error playing video:', media.src);
+                    // Optionally, skip to the next item on error
+                    playNext();
+                });
+                playerContainer.appendChild(video);
+                video.play().catch(e => {
+                    console.error("Autoplay was prevented:", e);
+                    // Autoplay policies may block this. The `muted` attribute helps, but isn't foolproof.
+                });
+            } else if (media.type === 'image') {
+                const image = document.createElement('img');
+                image.src = media.src;
+                image.className = 'w-full h-full object-contain rounded-lg';
+                playerContainer.appendChild(image);
+                
+                // If there's more than one item, transition after a delay.
+                if (playlist.length > 1) {
+                    const duration = (media.duration || 5) * 1000;
+                    imageTimeout = setTimeout(playNext, duration);
+                }
+            }
+        }
+
+        // Start playback
+        if (playlist.length > 0) {
+            playMedia(0);
+        } else {
+            playerContainer.innerHTML = '<div class="text-gray-500">Tidak ada media yang dikonfigurasi.</div>';
+        }
+    });
     </script>
-    @endif
 </body>
 </html>

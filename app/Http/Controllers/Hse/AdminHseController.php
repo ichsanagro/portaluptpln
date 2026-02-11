@@ -59,48 +59,10 @@ class AdminHseController extends Controller
             'safeWorkingDays' => $stats->safe_working_days,
             'accidentCount' => $stats->accident_count,
             'startDate' => $stats->start_date ? $stats->start_date->format('Y-m-d') : '',
-            'videoUrl' => $stats->video_url,
-            'imageUrl' => $stats->image_path ? asset('storage/' . $stats->image_path) : null, // Get full URL for display
-            'displayMode' => $stats->display_mode,
         ]);
     }
 
-    public function updateDisplaySettings(Request $request)
-    {
-        $stats = HseStat::firstOrFail();
 
-        $validated = $request->validate([
-            'display_mode' => 'required|in:video,image',
-            'video_url' => 'nullable|url',
-            'dashboard_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // 2MB Max
-        ]);
-
-        if ($validated['display_mode'] === 'video') {
-            $stats->video_url = $validated['video_url'];
-            $stats->image_path = null; // Clear image if switching to video
-            // If there was an old image, delete it
-            if ($request->hasFile('dashboard_image') && $stats->image_path) {
-                Storage::disk('public')->delete($stats->image_path);
-            }
-        } elseif ($validated['display_mode'] === 'image') {
-            $stats->video_url = null; // Clear video if switching to image
-            
-            // Handle image upload
-            if ($request->hasFile('dashboard_image')) {
-                // Delete old image if it exists
-                if ($stats->image_path) {
-                    Storage::disk('public')->delete($stats->image_path);
-                }
-                $imagePath = $request->file('dashboard_image')->store('dashboard_images', 'public');
-                $stats->image_path = $imagePath;
-            }
-        }
-        
-        $stats->display_mode = $validated['display_mode'];
-        $stats->save();
-
-        return redirect()->route('hse.admin_dashboard')->with('success', 'Pengaturan tampilan berhasil diperbarui.');
-    }
 
     public function updateStats(Request $request)
     {
@@ -209,37 +171,40 @@ class AdminHseController extends Controller
 
     public function playlist()
     {
-        $videos = PlaylistVideo::orderBy('order')->get();
-        return view('hse.admin.playlist', compact('videos'));
+        $files = PlaylistVideo::orderBy('order')->get();
+        return view('hse.admin.playlist', compact('files'));
     }
 
     public function playlistStore(Request $request)
     {
         $request->validate([
-            'videos.*' => 'required|mimetypes:video/mp4,video/avi,video/mpeg|max:5242880', // 5GB Max
+            'files.*' => 'required|mimetypes:video/mp4,video/avi,video/mpeg,image/jpeg,image/png,image/jpg,image/gif,image/svg|max:5242880', // 5GB Max for videos, less for images implicitly
         ]);
 
-        if ($request->hasFile('videos')) {
-            foreach ($request->file('videos') as $file) {
-                $path = $file->store('playlist_videos', 'public');
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('playlist_files', 'public');
+                $type = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
+
                 PlaylistVideo::create([
                     'path' => $path,
                     'original_name' => $file->getClientOriginalName(),
+                    'type' => $type,
                     'order' => PlaylistVideo::max('order') + 1,
                 ]);
             }
         }
 
-        return back()->with('success', 'Videos uploaded successfully.');
+        return back()->with('success', 'Files uploaded successfully.');
     }
 
     public function playlistDestroy($id)
     {
-        $video = PlaylistVideo::findOrFail($id);
-        Storage::disk('public')->delete($video->path);
-        $video->delete();
+        $file = PlaylistVideo::findOrFail($id);
+        Storage::disk('public')->delete($file->path);
+        $file->delete();
 
-        return back()->with('success', 'Video deleted successfully.');
+        return back()->with('success', 'File deleted successfully.');
     }
 
     public function playlistUpdateOrder(Request $request)
