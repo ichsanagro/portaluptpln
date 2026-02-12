@@ -106,7 +106,7 @@
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">ID</th>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">No.</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Nama Material</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Satuan</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Stok</th>
@@ -121,7 +121,7 @@
                     <tbody id="material-table-body" class="divide-y divide-slate-200 bg-white">
                         @foreach ($materials as $material)
                         <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{{ $material->id }}</td>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{{ $loop->iteration }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->nama_material }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->satuan }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $material->stok }}</td>
@@ -555,12 +555,12 @@
             tableBody.innerHTML = '';
 
             if (materials.length > 0) {
-                materials.forEach(material => {
+                materials.forEach((material, index) => { // Added index here
                     const editUrl = editUrlTemplate.replace(':id', material.id);
                     const deleteUrl = deleteUrlTemplate.replace(':id', material.id);
                     const row = `
                         <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">${material.id}</td>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">${index + 1}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.nama_material}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.satuan}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">${material.stok}</td>

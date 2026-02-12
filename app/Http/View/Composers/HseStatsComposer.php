@@ -24,34 +24,20 @@ class HseStatsComposer
 
             $startDate = $stats->start_date ?? Carbon::createFromDate($today->year, 1, 1);
 
-            $periodForWorkingDays = CarbonPeriod::create($startDate, $today);
-            $workingDaysThisYear = 0;
-            foreach ($periodForWorkingDays as $date) {
-                if (!$date->isWeekend()) {
-                    $workingDaysThisYear++;
-                }
-            }
-
-            $displayedSafeWorkingDays = 0;
-
-            if ($stats->accident_count === 0) {
-                $displayedSafeWorkingDays = $workingDaysThisYear;
-            } else {
-                $tempSafeWorkingDays = $stats->safe_working_days;
-                if ($stats->last_safe_working_day_update && $stats->last_safe_working_day_update < $today) {
-                    $periodForSafeDaysIncrement = CarbonPeriod::create($stats->last_safe_working_day_update->addDay(), $today);
-                    $daysToAdd = 0;
-                    foreach ($periodForSafeDaysIncrement as $date) {
-                        if (!$date->isWeekend()) {
-                            $daysToAdd++;
-                        }
-                    }
-                    $tempSafeWorkingDays += $daysToAdd;
-                }
-                $displayedSafeWorkingDays = $tempSafeWorkingDays;
-            }
+            // Calculate total days including weekends
+            $workingDaysThisYear = $startDate->diffInDays($today) + 1;
 
             $accidentLogs = AccidentLog::orderBy('accident_date', 'desc')->get();
+            $displayedSafeWorkingDays = 0;
+
+            if ($accidentLogs->isEmpty()) {
+                // No accidents, safe days are the same as total working days
+                $displayedSafeWorkingDays = $workingDaysThisYear;
+            } else {
+                // Accidents exist, calculate safe days from the last accident date
+                $lastAccidentDate = Carbon::parse($accidentLogs->first()->accident_date);
+                $displayedSafeWorkingDays = $lastAccidentDate->diffInDays($today);
+            }
             
             $view->with([
                 'safeWorkingDays' => $displayedSafeWorkingDays,

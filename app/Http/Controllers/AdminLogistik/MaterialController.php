@@ -19,7 +19,7 @@ class MaterialController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'nama_material'); // Default sort by nama_material
+        $sortBy = $request->input('sort_by', 'id'); // Default sort by id
         $sortDirection = $request->input('sort_direction', 'asc'); // Default sort direction ascending
 
         // Define allowed sortable columns
