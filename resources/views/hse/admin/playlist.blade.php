@@ -28,27 +28,41 @@
                 </form>
             </div>
 
+            <!-- YouTube Link Form -->
+            <div class="mb-6">
+                <form action="{{ route('hse.admin_playlist.store') }}" method="POST" class="bg-gray-50 p-6 rounded-lg shadow">
+                    @csrf
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Tambah dari Link YouTube</h2>
+                    <div class="space-y-3">
+                        <label for="links" class="block text-sm font-medium text-gray-700">Link YouTube (satu per baris)</label>
+                        <textarea name="links" id="links" rows="6" class="block w-full text-sm text-gray-900 border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="https://www.youtube.com/watch?v=..."></textarea>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Simpan Link</button>
+                    </div>
+                </form>
+            </div>
+
             <!-- Playlist -->
             <div>
                 <h2 class="text-xl font-semibold text-gray-700 mb-4">Daftar Putar</h2>
                 <div id="playlist-items" class="space-y-3">
                     @forelse ($files as $file)
                         <div data-id="{{ $file->id }}" class="flex items-center justify-between bg-white p-4 rounded-lg shadow cursor-move">
-                            <div class="flex items-center flex-grow">
+                            <div class="flex items-center flex-grow min-w-0">
                                 <svg class="w-6 h-6 text-gray-400 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                                 @if($file->type === 'image')
                                     <img src="{{ asset('storage/' . $file->path) }}" class="w-16 h-10 object-cover rounded-md mr-4" alt="thumbnail">
-                                @else
-                                    {{-- Placeholder for video thumbnail --}}
+                                @elseif($file->type === 'video')
                                     <div class="w-16 h-10 bg-gray-200 flex items-center justify-center rounded-md mr-4">
                                         <svg class="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2.667 3h14.666c.92 0 1.667.746 1.667 1.667v10.666c0 .92-.747 1.667-1.667 1.667H2.667A1.667 1.667 0 011 15.333V4.667C1 3.747 1.746 3 2.667 3zM3 5v10h14V5H3zm6 7l4-2.5L9 7v5z"></path></svg>
                                     </div>
+                                @elseif($file->type === 'youtube')
+                                    <img src="https://img.youtube.com/vi/{{ $file->path }}/default.jpg" class="w-16 h-10 object-cover rounded-md mr-4" alt="youtube thumbnail">
                                 @endif
                                 <span class="font-medium text-gray-800 truncate">{{ $file->original_name }}</span>
                             </div>
                             <div class="flex items-center space-x-3 flex-shrink-0 ml-4">
                                 <button class="play-button text-blue-500 hover:text-blue-700"
-                                        data-src="{{ asset('storage/' . $file->path) }}"
+                                        data-src="{{ $file->type === 'youtube' ? $file->path : asset('storage/' . $file->path) }}"
                                         data-type="{{ $file->type }}">
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                                 </button>
@@ -68,7 +82,6 @@
                     @endforelse
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -208,3 +221,4 @@
     }
 </script>
 @endpush
+

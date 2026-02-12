@@ -62,31 +62,46 @@
 
     </div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const playerContainer = document.getElementById('media-player-container');
-        let player = null;
+        let localPlayer = null; // HTML5 <video> or <img>
+        let ytPlayer = null; // YouTube Player object
         let imageTimeout = null;
-        let currentMediaIndex = -1;
+        let currentMediaIndex = 0;
 
-        // Unified playlist from the new playlist feature
-        let playlist = {!! json_encode($playlistItems->map(function($item) {
+        const playlist = {!! json_encode($playlistItems->map(function($item) {
+            $src = $item->type === 'youtube' ? $item->path : asset('storage/' . $item->path);
             return [
-                'src' => asset('storage/' . $item->path),
+                'src' => $src,
                 'type' => $item->type,
-                'duration' => $item->duration ?? 5, // Default 5s for images
+                'duration' => $item->duration, 
             ];
         })->all()) !!};
 
+        // This function will be called automatically by the YouTube API script
+        window.onYouTubeIframeAPIReady = function() {
+            // Start playback if the first item is a YouTube video
+            if (playlist.length > 0 && playlist[0].type === 'youtube') {
+                playMedia(0);
+            }
+        };
 
+        function destroyPlayers() {
+            // Destroy YouTube player if it exists
+            if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+                ytPlayer.destroy();
+            }
+            ytPlayer = null;
+            
+            // Clear local player
+            clearTimeout(imageTimeout);
+            playerContainer.innerHTML = '';
+            localPlayer = null;
+        }
 
         function playNext() {
-            // If there's only one item and it's an image, don't loop, just hold.
-             if (playlist.length === 1 && playlist[0].type === 'image') {
-                playMedia(0); // Display the image and stop.
-                return;
-            }
-
             currentMediaIndex++;
             if (currentMediaIndex >= playlist.length) {
                 currentMediaIndex = 0; // Loop playlist
@@ -100,10 +115,9 @@
                 return;
             }
 
-            clearTimeout(imageTimeout);
+            destroyPlayers();
             currentMediaIndex = index;
             const media = playlist[index];
-            playerContainer.innerHTML = '';
 
             if (media.type === 'video') {
                 const video = document.createElement('video');
@@ -112,33 +126,62 @@
                 video.muted = true;
                 video.className = 'w-full h-full object-contain rounded-lg';
                 video.addEventListener('ended', playNext);
-                video.addEventListener('error', function() {
-                    console.error('Error playing video:', media.src);
-                    // Optionally, skip to the next item on error
-                    playNext();
-                });
-                playerContainer.appendChild(video);
-                video.play().catch(e => {
-                    console.error("Autoplay was prevented:", e);
-                    // Autoplay policies may block this. The `muted` attribute helps, but isn't foolproof.
-                });
+                video.addEventListener('error', () => { console.error('Error playing video:', media.src); playNext(); });
+                localPlayer = video;
+                playerContainer.appendChild(localPlayer);
+                localPlayer.play().catch(e => console.error("Autoplay was prevented:", e));
+
             } else if (media.type === 'image') {
                 const image = document.createElement('img');
                 image.src = media.src;
                 image.className = 'w-full h-full object-contain rounded-lg';
-                playerContainer.appendChild(image);
+                localPlayer = image;
+                playerContainer.appendChild(localPlayer);
                 
-                // If there's more than one item, transition after a delay.
                 if (playlist.length > 1) {
-                    const duration = (media.duration || 5) * 1000;
+                    const duration = (media.duration || 5) * 1000; // Default 5s for images
                     imageTimeout = setTimeout(playNext, duration);
                 }
+            } else if (media.type === 'youtube') {
+                // The container div for the YouTube player
+                const ytContainer = document.createElement('div');
+                ytContainer.id = 'youtube-player-div';
+                playerContainer.appendChild(ytContainer);
+
+                ytPlayer = new YT.Player('youtube-player-div', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: media.src,
+                    playerVars: {
+                        'autoplay': 1,
+                        'mute': 1,
+                        'controls': 1,
+                        'showinfo': 0,
+                        'rel': 0,
+                        'iv_load_policy': 3,
+                        'modestbranding': 1,
+                        'loop': 0, // Loop is handled by our playlist logic
+                    },
+                    events: {
+                        'onReady': (event) => event.target.playVideo(),
+                        'onStateChange': (event) => {
+                            // If video has ended
+                            if (event.data === YT.PlayerState.ENDED) {
+                                playNext();
+                            }
+                        }
+                    }
+                });
             }
         }
 
-        // Start playback
+        // Initial playback trigger
         if (playlist.length > 0) {
-            playMedia(0);
+            // If the first item is not a YouTube video, play it directly.
+            // If it IS a youtube video, onYouTubeIframeAPIReady will handle it.
+            if (playlist[0].type !== 'youtube') {
+                playMedia(0);
+            }
         } else {
             playerContainer.innerHTML = '<div class="text-gray-500">Tidak ada media yang dikonfigurasi.</div>';
         }
