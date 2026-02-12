@@ -177,41 +177,11 @@ class AdminHseController extends Controller
 
     public function playlistStore(Request $request)
     {
-        // Handle YouTube Links
-        if ($request->has('links')) {
-            $validated = $request->validate([
-                'links' => 'required|string',
-            ]);
+        $request->validate([
+            'files.*' => 'required|mimetypes:video/mp4,video/avi,video/mpeg,image/jpeg,image/png,image/jpg,image/gif,image/svg|max:5242880', // 5GB Max for videos, less for images implicitly
+        ]);
 
-            $links = preg_split('/\\r\\n|\\n|\\r/', $validated['links']);
-            $links = array_filter($links); // Remove empty lines
-
-            if (empty($links)) {
-                return back()->withErrors(['links' => 'Kolom link tidak boleh kosong.']);
-            }
-
-            foreach ($links as $link) {
-                $videoId = $this->getYouTubeVideoId($link);
-
-                if ($videoId) {
-                    PlaylistVideo::create([
-                        'path' => $videoId,
-                        'original_name' => $link,
-                        'type' => 'youtube',
-                        'order' => PlaylistVideo::max('order') + 1,
-                    ]);
-                }
-            }
-
-            return back()->with('success', 'YouTube video(s) added successfully.');
-        }
-
-        // Handle File Uploads
         if ($request->hasFile('files')) {
-            $request->validate([
-                'files.*' => 'required|mimetypes:video/mp4,video/avi,video/mpeg,image/jpeg,image/png,image/jpg,image/gif,image/svg|max:5242880', // 5GB Max
-            ]);
-
             foreach ($request->file('files') as $file) {
                 $path = $file->store('playlist_files', 'public');
                 $type = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
@@ -223,19 +193,9 @@ class AdminHseController extends Controller
                     'order' => PlaylistVideo::max('order') + 1,
                 ]);
             }
-            return back()->with('success', 'Files uploaded successfully.');
         }
 
-        return back()->withErrors(['files' => 'Tidak ada file atau link yang diberikan.']);
-    }
-
-    private function getYouTubeVideoId(string $url): ?string
-    {
-        $pattern = '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i';
-        if (preg_match($pattern, $url, $match)) {
-            return $match[1];
-        }
-        return null;
+        return back()->with('success', 'Files uploaded successfully.');
     }
 
     public function playlistDestroy($id)
