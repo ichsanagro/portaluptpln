@@ -43,13 +43,13 @@ class UserLogistikController extends Controller
 
     public function peminjaman()
     {
-        $all_materials = Material::where('jenis_kebutuhan', 'peminjaman')->get();
+        $all_materials = Material::where('jenis_kebutuhan', 'peminjaman')->orderBy('id', 'asc')->get();
         return view('logistik.userlogistik.peminjaman', compact('all_materials'));
     }
 
     public function permintaan()
     {
-        $materials_permintaan = Material::where('jenis_kebutuhan', 'permintaan')->get();
+        $materials_permintaan = Material::where('jenis_kebutuhan', 'permintaan')->orderBy('id', 'asc')->get();
         return view('logistik.userlogistik.permintaan', compact('materials_permintaan'));
     }
 
@@ -389,5 +389,19 @@ class UserLogistikController extends Controller
         // dd($riwayatPeminjaman); // Diagnostic 2: Check fetched data
 
         return view('logistik.userlogistik.riwayat', compact('riwayatPeminjaman'));
+    }
+
+    public function showRiwayat($id)
+    {
+        $peminjaman = Peminjaman::with('details.material', 'user')
+            ->where('id', $id)
+            ->where('user_id', auth()->id()) // Ensure the user can only see their own history
+            ->first();
+
+        if (!$peminjaman) {
+            return redirect()->back()->with('error', 'Riwayat peminjaman tidak ditemukan.');
+        }
+
+        return view('logistik.userlogistik.riwayat_show', compact('peminjaman'));
     }
 }

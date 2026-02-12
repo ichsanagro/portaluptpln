@@ -98,6 +98,7 @@ Route::prefix('logistik')->name('logistik.')->group(function () {
         Route::get('/kerusakan', [UserLogistikController::class, 'kerusakan'])->name('kerusakan');
         Route::post('/kerusakan', [UserLogistikController::class, 'storeKerusakan'])->name('kerusakan.store');
         Route::get('/riwayat', [UserLogistikController::class, 'riwayatPeminjaman'])->name('riwayat'); // New route for borrowing history
+        Route::get('/riwayat/{id}', [UserLogistikController::class, 'showRiwayat'])->name('riwayat.show');
     });
 });
 

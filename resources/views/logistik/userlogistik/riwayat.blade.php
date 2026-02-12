@@ -20,22 +20,27 @@
                     <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                             <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">ID Peminjaman</th>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">No.</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Tanggal Peminjaman</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Status</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Detail Material</th>
+                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                    <span class="sr-only">Aksi</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white">
                             @foreach ($riwayatPeminjaman as $peminjaman)
                             <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{{ $peminjaman->id }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ \Carbon\Carbon::parse($peminjaman->tanggal_peminjaman)->format('d M Y H:i') }}</td>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{{ $loop->iteration }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{{ $peminjaman->created_at->format('d M Y H:i') }}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{
                                         $peminjaman->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                         ($peminjaman->status === 'approved' ? 'bg-green-100 text-green-800' :
-                                        'bg-gray-100 text-gray-800')
+                                        ($peminjaman->status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                                        ($peminjaman->status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                        'bg-gray-100 text-gray-800')))
                                     }}">
                                         {{ ucfirst($peminjaman->status) }}
                                     </span>
@@ -51,6 +56,9 @@
                                             </li>
                                         @endforeach
                                     </ul>
+                                </td>
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                    <a href="{{ route('logistik.userlogistik.riwayat.show', $peminjaman->id) }}" class="text-blue-600 hover:text-blue-900">Lihat</a>
                                 </td>
                             </tr>
                             @endforeach
