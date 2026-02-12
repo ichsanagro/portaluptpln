@@ -165,13 +165,19 @@ class UserLogistikController extends Controller
             return redirect()->back()->withErrors('Tidak ada jumlah material yang diisi untuk dikembalikan.');
         }
 
-        // After updating all details, check if the parent Peminjaman is fully returned
-        $peminjaman->load('details');
-        $allDetailsReturned = $peminjaman->details->every(function ($detail) {
+        // After updating all details, check if the parent Peminjaman is fully handled
+        $peminjaman->load('details.material'); // Eager load material to get its type
+        $allDetailsHandled = $peminjaman->details->every(function ($detail) {
+            // If the material is a 'permintaan' (consumable), it's always considered "handled".
+            if ($detail->material->jenis_kebutuhan === 'permintaan') {
+                return true;
+            }
+    
+            // Otherwise, for 'peminjaman' (loanable) items, check if it's fully returned.
             return $detail->jumlah === $detail->returned_jumlah;
         });
-
-        if ($allDetailsReturned) {
+    
+        if ($allDetailsHandled) {
             $peminjaman->update(['status' => 'completed']);
         }
 
