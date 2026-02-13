@@ -33,7 +33,7 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-3xl text-center">
                     <h1 class="text-4xl font-bold tracking-tight text-blue-800 sm:text-6xl">
-                        Portal Digital Terintegrasi UPT PLN
+                        Portal Digital Terintegrasi PT PLN (Persero) UPT BENGKULU
                     </h1>
                     <p class="mt-6 text-lg leading-8 text-gray-700">
                         Pusat layanan digital untuk mendukung kinerja dan operasional seluruh karyawan UPT PLN secara efisien, modern, dan Andal.

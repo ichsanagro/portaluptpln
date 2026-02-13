@@ -15,16 +15,27 @@
 
             <!-- Upload Form -->
             <div class="mb-6">
-                <form action="{{ route('hse.admin_playlist.store') }}" method="POST" enctype="multipart/form-data" class="bg-gray-50 p-6 rounded-lg shadow">
+                <form action="{{ route('hse.admin_playlist.store') }}" method="POST" enctype="multipart/form-data" class="bg-gray-50 p-6 rounded-lg shadow mb-6">
                     @csrf
                     <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload Media Baru (Gambar/Video)</h2>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 mb-4">
                         <input type="file" name="files[]" multiple accept="video/mp4,video/avi,video/mpeg,image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">Upload</button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">Upload File</button>
                     </div>
                     @error('files.*')
                         <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                     @enderror
+
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Tambahkan Video YouTube</h2>
+                        <div class="flex items-center space-x-4">
+                            <input type="text" name="youtube_url" placeholder="Masukkan Link YouTube (e.g., https://www.youtube.com/watch?v=VIDEO_ID)" class="flex-grow rounded-md shadow-sm border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Tambahkan YouTube</button>
+                        </div>
+                        @error('youtube_url')
+                            <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </form>
             </div>
 
@@ -38,17 +49,19 @@
                                 <svg class="w-6 h-6 text-gray-400 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                                 @if($file->type === 'image')
                                     <img src="{{ asset('storage/' . $file->path) }}" class="w-16 h-10 object-cover rounded-md mr-4" alt="thumbnail">
-                                @else
-                                    {{-- Placeholder for video thumbnail --}}
+                                @elseif($file->type === 'video')
+                                    {{-- Placeholder for video thumbnail for uploaded videos --}}
                                     <div class="w-16 h-10 bg-gray-200 flex items-center justify-center rounded-md mr-4">
                                         <svg class="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2.667 3h14.666c.92 0 1.667.746 1.667 1.667v10.666c0 .92-.747 1.667-1.667 1.667H2.667A1.667 1.667 0 011 15.333V4.667C1 3.747 1.746 3 2.667 3zM3 5v10h14V5H3zm6 7l4-2.5L9 7v5z"></path></svg>
                                     </div>
+                                @elseif($file->type === 'youtube_video')
+                                    <img src="https://img.youtube.com/vi/{{ $file->path }}/0.jpg" class="w-16 h-10 object-cover rounded-md mr-4" alt="YouTube thumbnail">
                                 @endif
                                 <span class="font-medium text-gray-800 truncate">{{ $file->original_name }}</span>
                             </div>
                             <div class="flex items-center space-x-3 flex-shrink-0 ml-4">
                                 <button class="play-button text-blue-500 hover:text-blue-700"
-                                        data-src="{{ asset('storage/' . $file->path) }}"
+                                        data-src="{{ $file->type === 'youtube_video' ? $file->path : asset('storage/' . $file->path) }}"
                                         data-type="{{ $file->type }}">
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                                 </button>
@@ -80,14 +93,16 @@
     document.addEventListener('DOMContentLoaded', function () {
         const playerContainer = document.getElementById('media-player-container');
         const playlistItemsContainer = document.getElementById('playlist-items');
-        let player = null; // Can be <video> or <img>
+        let player = null; // Can be <video>, <img> or <iframe>
         let imageTimeout = null; // To handle image display duration
+        let ytPlayer = null; // YouTube Player instance
 
         let playlist = @json($files->map(function($file) {
+            $src = $file->type === 'youtube_video' ? 'https://www.youtube.com/embed/' . $file->path . '?enablejsapi=1&mute=1' : asset('storage/' . $file->path);
             return [
-                'src' => asset('storage/' . $file->path),
+                'src' => $src,
                 'type' => $file->type,
-                'duration' => $file->duration ?? 5 // Default 5s for images
+                'duration' => $file->duration ?? 5 // Default 5s for images/local videos
             ];
         }));
         let currentMediaIndex = -1;
@@ -133,6 +148,48 @@
                 // Go to next item after a delay (e.g., 5 seconds)
                 const duration = (media.duration || 5) * 1000;
                 imageTimeout = setTimeout(playNext, duration);
+            } else if (media.type === 'youtube_video') {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'youtube-player'; // Assign an ID for the YouTube API
+                iframe.src = `https://www.youtube.com/embed/${media.src}?autoplay=1&mute=1&enablejsapi=1`;
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; encrypted-media');
+                iframe.setAttribute('frameborder', '0');
+                iframe.className = 'w-full h-full max-h-[480px]'; // Occupy full space
+                player = iframe;
+                playerContainer.appendChild(player);
+
+                // Load YouTube IFrame API script if not already loaded and define the callback
+                if (typeof window.onYouTubeIframeAPIReady === 'undefined') {
+                    window.onYouTubeIframeAPIReady = function() {
+                        ytPlayer = new YT.Player('youtube-player', {
+                            events: {
+                                'onReady': (event) => { event.target.playVideo(); },
+                                'onStateChange': (event) => {
+                                    if (event.data === YT.PlayerState.ENDED) {
+                                        playNext();
+                                    }
+                                }
+                            }
+                        });
+                    };
+                    const tag = document.createElement('script');
+                    tag.src = "https://www.youtube.com/iframe_api";
+                    const firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                } else {
+                    // If API is already loaded, create player directly
+                    ytPlayer = new YT.Player('youtube-player', {
+                        events: {
+                            'onReady': (event) => { event.target.playVideo(); },
+                            'onStateChange': (event) => {
+                                if (event.data === YT.PlayerState.ENDED) {
+                                    playNext();
+                                }
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -168,9 +225,11 @@
                         // Re-create the playlist array based on the new DOM order
                         const newPlaylist = [];
                         document.querySelectorAll('#playlist-items .play-button').forEach(button => {
+                            const type = button.dataset.type;
+                            const src = button.dataset.src;
                             newPlaylist.push({
-                                src: button.dataset.src,
-                                type: button.dataset.type,
+                                src: src,
+                                type: type,
                                 duration: 5 // Default duration, needs to be stored if you want it configurable
                             });
                         });
@@ -208,3 +267,4 @@
     }
 </script>
 @endpush
+

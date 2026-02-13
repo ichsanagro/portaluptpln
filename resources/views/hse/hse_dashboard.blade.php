@@ -71,22 +71,16 @@
 
         // Unified playlist from the new playlist feature
         let playlist = {!! json_encode($playlistItems->map(function($item) {
+            $src = $item->type === 'youtube_video' ? 'https://www.youtube.com/embed/' . $item->path . '?enablejsapi=1&mute=1' : asset('storage/' . $item->path);
             return [
-                'src' => asset('storage/' . $item->path),
+                'src' => $src,
                 'type' => $item->type,
                 'duration' => $item->duration ?? 5, // Default 5s for images
             ];
         })->all()) !!};
 
 
-
         function playNext() {
-            // If there's only one item and it's an image, don't loop, just hold.
-             if (playlist.length === 1 && playlist[0].type === 'image') {
-                playMedia(0); // Display the image and stop.
-                return;
-            }
-
             currentMediaIndex++;
             if (currentMediaIndex >= playlist.length) {
                 currentMediaIndex = 0; // Loop playlist
@@ -132,6 +126,46 @@
                 if (playlist.length > 1) {
                     const duration = (media.duration || 5) * 1000;
                     imageTimeout = setTimeout(playNext, duration);
+                }
+            } else if (media.type === 'youtube_video') {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'youtube-player'; // Assign an ID for the YouTube API
+                iframe.src = media.src; // Already formatted in playlist
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; encrypted-media');
+                iframe.setAttribute('frameborder', '0');
+                iframe.className = 'w-full h-full object-contain rounded-lg'; // Occupy full space
+                playerContainer.appendChild(iframe);
+
+                // Load YouTube IFrame API script if not already loaded
+                if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+                    var tag = document.createElement('script');
+                    tag.src = "https://www.youtube.com/iframe_api";
+                    var firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                    window.onYouTubeIframeAPIReady = function() {
+                        new YT.Player('youtube-player', {
+                            events: {
+                                'onReady': (event) => { event.target.playVideo(); },
+                                'onStateChange': (event) => {
+                                    if (event.data === YT.PlayerState.ENDED) {
+                                        playNext();
+                                    }
+                                }
+                            }
+                        });
+                    };
+                } else {
+                    new YT.Player('youtube-player', {
+                        events: {
+                            'onReady': (event) => { event.target.playVideo(); },
+                            'onStateChange': (event) => {
+                                if (event.data === YT.PlayerState.ENDED) {
+                                    playNext();
+                                }
+                            }
+                        }
+                    });
                 }
             }
         }

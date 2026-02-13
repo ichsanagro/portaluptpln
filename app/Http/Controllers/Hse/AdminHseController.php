@@ -177,8 +177,11 @@ class AdminHseController extends Controller
 
     public function playlistStore(Request $request)
     {
+        // Validate either files or youtube_url
         $request->validate([
-            'files.*' => 'required|mimetypes:video/mp4,video/avi,video/mpeg,image/jpeg,image/png,image/jpg,image/gif,image/svg|max:5242880', // 5GB Max for videos, less for images implicitly
+            'files' => 'array',
+            'files.*' => 'mimetypes:video/mp4,video/avi,video/mpeg,image/jpeg,image/png,image/jpg,image/gif,image/svg|max:5242880', // 5GB Max for videos, less for images implicitly
+            'youtube_url' => 'nullable|url', // YouTube URL is optional
         ]);
 
         if ($request->hasFile('files')) {
@@ -195,7 +198,60 @@ class AdminHseController extends Controller
             }
         }
 
-        return back()->with('success', 'Files uploaded successfully.');
+        if ($request->filled('youtube_url')) {
+            $youtubeUrl = $request->input('youtube_url');
+            $videoId = $this->extractYoutubeVideoId($youtubeUrl);
+
+            if ($videoId) {
+                PlaylistVideo::create([
+                    'path' => $videoId, // Store only the video ID
+                    'original_name' => 'YouTube Video',
+                    'type' => 'youtube_video', // New type for YouTube videos
+                    'order' => PlaylistVideo::max('order') + 1,
+                ]);
+            } else {
+                return back()->withErrors(['youtube_url' => 'Invalid YouTube URL provided.'])->withInput();
+            }
+        }
+        
+        if (!$request->hasFile('files') && !$request->filled('youtube_url')) {
+            return back()->withErrors(['message' => 'Please provide a file or a YouTube URL.'])->withInput();
+        }
+
+        return back()->with('success', 'Playlist items added successfully.');
+    }
+
+    /**
+     * Extracts the YouTube video ID from a given URL.
+     *
+     * @param string $url
+     * @return string|null
+     */
+    private function extractYoutubeVideoId(string $url): ?string
+    {
+        $parsedUrl = parse_url($url);
+
+        if ($parsedUrl === false) {
+            return null; // Invalid URL
+        }
+
+        // Handle standard youtube.com/watch?v= format
+        if (isset($parsedUrl['host']) && ($parsedUrl['host'] === 'www.youtube.com' || $parsedUrl['host'] === 'youtube.com') && isset($parsedUrl['query'])) {
+            parse_str($parsedUrl['query'], $queryParams);
+            if (isset($queryParams['v']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', $queryParams['v'])) {
+                return $queryParams['v'];
+            }
+        }
+
+        // Handle short youtu.be/ format
+        if (isset($parsedUrl['host']) && $parsedUrl['host'] === 'youtu.be' && isset($parsedUrl['path'])) {
+            $path = trim($parsedUrl['path'], '/');
+            if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $path)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 
     public function playlistDestroy($id)
