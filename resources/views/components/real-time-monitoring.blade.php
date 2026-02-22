@@ -124,21 +124,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const url = `/hse/monitoring-iot/${station.id}`;
 
         return `
-            <a href="${url}" class="block bg-white p-4 rounded-lg shadow-md flex flex-col border border-gray-200 hover:shadow-xl hover:border-blue-500 transition" style="min-width: 250px;">
-                <h3 class="text-lg font-bold text-gray-800 text-center flex items-center justify-center h-14">${station.name}</h3>
+            <a href="${url}" class="block bg-white p-2 rounded-lg shadow-md flex flex-col border border-gray-200 hover:shadow-xl hover:border-blue-500 transition" style="min-width: 180px;">
+                <h3 class="text-md font-bold text-gray-800 text-center flex items-center justify-center h-10">${station.name}</h3>
                 
                 {{-- Temperature and Icon --}}
-                <div class="flex items-center justify-center my-4">
-                    <div class="text-5xl font-bold text-gray-800 leading-none">
+                <div class="flex items-center justify-center my-2">
+                    <div class="text-3xl font-bold text-gray-800 leading-none">
                         ${temperature}&deg;
                     </div>
-                    <div class="ml-2 text-4xl text-gray-600 leading-none">
+                    <div class="ml-1 text-2xl text-gray-600 leading-none">
                         ${weatherIcon}
                     </div>
                 </div>
 
                 {{-- Wind and Humidity Details --}}
-                <div class="mt-auto text-sm text-gray-700">
+                <div class="mt-auto text-xs text-gray-700">
                     <div class="flex justify-between items-center py-1 border-t border-gray-200">
                         <span>Angin:</span>
                         <span class="font-semibold">${windSpeed} km/h</span>

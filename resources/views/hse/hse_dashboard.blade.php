@@ -39,24 +39,26 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased bg-gray-100">
 
     <div class="w-screen h-screen flex flex-col p-2 gap-2">
         
-        <h1 class="text-2xl font-bold text-center text-[#28a8e0] flex-shrink-0">HSE Dashboard</h1>
+        <div class="h-[5%] flex-shrink-0">
+            <h1 class="text-2xl font-bold text-center text-[#28a8e0]">HSE Dashboard</h1>
+        </div>
 
         {{-- HSE Stats Component (static) --}}
-        <div class="bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
+        <div class=" bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
             @include('components.hse-stats')
         </div>
 
         {{-- Real-Time Monitoring (will be made horizontally scrollable internally) --}}
-        <div class="bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
+        <div class="h-[35%] bg-white p-2 rounded-lg shadow-lg flex-shrink-0">
             @include('components.real-time-monitoring', ['substations' => $substations])
         </div>
 
         {{-- Display Content Component --}}
-        <div id="media-player-container" class="bg-white p-1 rounded-lg shadow-lg flex-grow min-h-0 flex items-center justify-center">
+        <div id="media-player-container" class="h-[50%] bg-white p-1 rounded-lg shadow-lg flex items-center justify-center">
             {{-- Player will be dynamically inserted here. --}}
         </div>
 
@@ -71,7 +73,7 @@
 
         // Unified playlist from the new playlist feature
         let playlist = {!! json_encode($playlistItems->map(function($item) {
-            $src = $item->type === 'youtube_video' ? 'https://www.youtube.com/embed/' . $item->path . '?enablejsapi=1&mute=1' : asset('storage/' . $item->path);
+            $src = $item->type === 'youtube_video' ? 'https://www.youtube.com/embed/' . $item->path . '?enablejsapi=1&autoplay=1' : asset('storage/' . $item->path);
             return [
                 'src' => $src,
                 'type' => $item->type,
@@ -94,10 +96,16 @@
                 return;
             }
 
+            // Destroy previous player if it exists
+            if (player && typeof player.destroy === 'function') {
+                player.destroy();
+                player = null;
+            }
+
             clearTimeout(imageTimeout);
             currentMediaIndex = index;
             const media = playlist[index];
-            playerContainer.innerHTML = '';
+            playerContainer.innerHTML = ''; // Clear container
 
             if (media.type === 'video') {
                 const video = document.createElement('video');
@@ -108,57 +116,44 @@
                 video.addEventListener('ended', playNext);
                 video.addEventListener('error', function() {
                     console.error('Error playing video:', media.src);
-                    // Optionally, skip to the next item on error
                     playNext();
                 });
                 playerContainer.appendChild(video);
-                video.play().catch(e => {
-                    console.error("Autoplay was prevented:", e);
-                    // Autoplay policies may block this. The `muted` attribute helps, but isn't foolproof.
-                });
+                video.play().catch(e => console.error("Autoplay was prevented:", e));
+
             } else if (media.type === 'image') {
                 const image = document.createElement('img');
                 image.src = media.src;
-                image.className = 'w-full h-full object-contain rounded-lg';
+                image.className = 'w-full h-full object-contain rounded-lg'; // Changed to object-contain
                 playerContainer.appendChild(image);
                 
-                // If there's more than one item, transition after a delay.
                 if (playlist.length > 1) {
                     const duration = (media.duration || 5) * 1000;
                     imageTimeout = setTimeout(playNext, duration);
                 }
-            } else if (media.type === 'youtube_video') {
-                const iframe = document.createElement('iframe');
-                iframe.id = 'youtube-player'; // Assign an ID for the YouTube API
-                iframe.src = media.src; // Already formatted in playlist
-                iframe.setAttribute('allowfullscreen', '');
-                iframe.setAttribute('allow', 'autoplay; encrypted-media');
-                iframe.setAttribute('frameborder', '0');
-                iframe.className = 'w-full h-full object-contain rounded-lg'; // Occupy full space
-                playerContainer.appendChild(iframe);
 
-                // Load YouTube IFrame API script if not already loaded
-                if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
-                    var tag = document.createElement('script');
-                    tag.src = "https://www.youtube.com/iframe_api";
-                    var firstScriptTag = document.getElementsByTagName('script')[0];
-                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                    window.onYouTubeIframeAPIReady = function() {
-                        new YT.Player('youtube-player', {
-                            events: {
-                                'onReady': (event) => { event.target.playVideo(); },
-                                'onStateChange': (event) => {
-                                    if (event.data === YT.PlayerState.ENDED) {
-                                        playNext();
-                                    }
-                                }
-                            }
-                        });
-                    };
-                } else {
-                    new YT.Player('youtube-player', {
+            } else if (media.type === 'youtube_video') {
+                const playerId = 'youtube-player-' + new Date().getTime(); // Unique ID
+                const playerDiv = document.createElement('div');
+                playerDiv.id = playerId;
+                playerContainer.appendChild(playerDiv);
+
+                const createPlayer = () => {
+                    player = new YT.Player(playerId, {
+                        height: '100%',
+                        width: '100%',
+                        videoId: media.src.split('/').pop().split('?')[0], // Extract video ID
+                        playerVars: {
+                            'autoplay': 1,
+                            'controls': 1, // Changed to 1 to show controls
+                            'mute': 0, // Not muted
+                            'loop': 0,
+                            'playlist': media.src.split('/').pop().split('?')[0] // Required for loop
+                        },
                         events: {
-                            'onReady': (event) => { event.target.playVideo(); },
+                            'onReady': (event) => {
+                                event.target.playVideo(); // Explicitly play
+                            },
                             'onStateChange': (event) => {
                                 if (event.data === YT.PlayerState.ENDED) {
                                     playNext();
@@ -166,6 +161,17 @@
                             }
                         }
                     });
+                };
+
+                if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+                    // Load YouTube IFrame API script if not already loaded
+                    window.onYouTubeIframeAPIReady = createPlayer;
+                    var tag = document.createElement('script');
+                    tag.src = "https://www.youtube.com/iframe_api";
+                    var firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                } else {
+                    createPlayer();
                 }
             }
         }
